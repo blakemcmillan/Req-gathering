@@ -67,12 +67,30 @@ Once I have the product name, we'll proceed with discovery.
 
 ### Step 4: Display Value Prop Canvas & Final Gate
 
-Display the discovered data as a Value Prop Canvas (user side):
+Display the discovered data as a Value Prop Canvas (user side) using the same structure as the output file:
 
-| Role | Task | Gains | Pains |
-|------|------|-------|-------|
-| [User 1] | [Task] | [list] | [list] |
-| ... | ... | ... | ... |
+```
+### [User Role 1]
+
+#### Job 1: [Job Description]
+**Gains:**
+- [gain 1]
+- [gain 2]
+
+**Pains:**
+- [pain 1]
+- [pain 2]
+
+#### Job 2: [Job Description]
+**Gains:**
+- [gain 1]
+
+**Pains:**
+- [pain 1]
+
+### [User Role 2]
+[Continue with all roles and jobs discovered]
+```
 
 **Any other things we need to cover before I begin creating your PRD?**
 - If yes → return to appropriate step
