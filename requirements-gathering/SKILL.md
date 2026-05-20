@@ -82,13 +82,55 @@ Display the discovered data as a Value Prop Canvas (user side):
 
 ## Output & Handoff
 
-Save the complete discovery data (product name, all users, tasks, gains, pains, canvas) to:
+Save the complete discovery data to `requirements-<product_name>.md` in `/Users/blakemcmillan/Documents/VSCode/Req-gathering/`
+
+### Output Format
+
+Structure the requirements file with each user role as a top-level section, followed by their jobs (tasks), gains, and pains:
 
 ```
-requirements-<product_name>.md
-```
+# Requirements: <Product Name>
 
-in the root directory where this skill was invoked.
+### [User Role 1]
+
+#### Job 1: [Job Description]
+**Gains:**
+- [gain 1]
+- [gain 2]
+- [as many as needed]
+
+**Pains:**
+- [pain 1]
+- [pain 2]
+- [as many as needed]
+
+#### Job 2: [Job Description]
+**Gains:**
+- [gain 1]
+- [gain 2]
+
+**Pains:**
+- [pain 1]
+
+[Continue with as many jobs as needed]
+
+### [User Role 2]
+
+#### Job 1: [Job Description]
+**Gains:**
+- [gain 1]
+
+**Pains:**
+- [pain 1]
+
+[Continue with as many user roles as needed]
+
+---
+
+## Value Prop Canvas (User Side)
+
+[Canvas table showing aggregated user needs]
+```
 
 Then offer:
 
