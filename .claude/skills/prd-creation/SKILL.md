@@ -72,6 +72,15 @@ For each major gain or pain cluster, design a feature that solves it. Show the m
 
 ### Step 4: Generate PRD
 
+#### 🚫 SOURCE-DRIVEN PRINCIPLE
+Only populate PRD sections with content that is EITHER:
+- Explicitly stated or clearly referenced in the input requirements document, OR
+- Directly derived from discovered user gains/pains/tasks (e.g., success metrics derived from gains)
+
+If a section cannot be populated from source material, leave it empty or omit it. Do not invent, speculate, or assume constraints, technical dependencies, or business decisions not grounded in the discovered requirements.
+
+---
+
 Create a markdown PRD with these sections:
 
 #### 1. Product Overview
@@ -119,11 +128,8 @@ For each feature, include:
 - **Solves For** — which user roles, tasks, gains, and pains this feature addresses (many-to-one traceability)
 - **Functional Requirements** — what the feature does, user workflows it enables, integration points
 - **Non-Functional Requirements** — performance expectations, scalability, security, reliability
-- **Constraints**
-  - *Technical:* architecture limitations, technology choices, integration dependencies
-  - *Business:* timeline/availability, resource constraints, cost considerations
+- **Constraints** (only if explicitly stated in requirements)
 - **Success Metrics** — how we measure success, KPIs tied to user goals
-- **Edge Cases & Considerations** — potential issues or failure modes, user scenarios to handle, data validation, error handling strategies
 
 #### 5. Non-Functional Requirements (Product-Wide)
 - Cross-cutting concerns not tied to individual features
