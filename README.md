@@ -143,18 +143,20 @@ Each product folder contains the complete product specification chain, making it
 
 ### End-to-End Example
 
-See `examples/` for a complete walkthrough using a **Habit Tracker** (fitness app):
+See `output/habit-tracker/` for a complete walkthrough of the **Habit Tracker** (fitness app):
 
-- `examples/concept.md` — Initial product idea
-- `examples/reqs-gather-user-test-data.md` — Discovered requirements (same as `/output/habit-tracker/requirements.md`)
-- `examples/prd-habit-tracker.md` — Generated PRD with 6 features (same as `/output/habit-tracker/prd.md`)
-- `examples/user-stories-habit-tracker.md` — Detailed user stories with acceptance criteria (same as `/output/habit-tracker/user-stories.md`)
+- `output/habit-tracker/concept.md` — Initial product idea
+- `output/habit-tracker/requirements.md` — Discovered user needs (from requirements-gathering)
+- `output/habit-tracker/prd.md` — Generated PRD with 6 features (from prd-creation)
+- `output/habit-tracker/user-stories.md` — Detailed user stories with 12 stories & 36 acceptance criteria (from user-story-expansion)
+- `output/habit-tracker/test-plan.md` — Comprehensive test strategy with 38 test cases (from test-plan)
 
 To see how the workflow flows:
 1. Start with `concept.md` (what we're building)
-2. Read `reqs-gather-user-test-data.md` (what we learned from users)
-3. Study `prd-habit-tracker.md` (how we turned discovery into features)
-4. Review `user-stories-habit-tracker.md` (detailed acceptance criteria)
+2. Read `requirements.md` (what we learned from users)
+3. Study `prd.md` (how we turned discovery into features)
+4. Review `user-stories.md` (detailed acceptance criteria with Gherkin format)
+5. Examine `test-plan.md` (how we verify everything works with unit, integration, E2E, edge case, and performance tests)
 
 ---
 
@@ -188,11 +190,13 @@ Start by understanding problems (gains/pains), not by designing solutions. Users
 ```
 .
 ├── README.md                           (this file)
-├── examples/
-│   ├── concept.md                      (Habit Tracker: initial idea)
-│   ├── reqs-gather-user-test-data.md   (Habit Tracker: discovered needs)
-│   ├── prd-habit-tracker.md            (Habit Tracker: full PRD)
-│   └── user-stories-habit-tracker.md   (Habit Tracker: detailed stories)
+├── output/
+│   └── habit-tracker/
+│       ├── concept.md                  (initial product idea)
+│       ├── requirements.md             (discovered user needs)
+│       ├── prd.md                      (6-feature PRD)
+│       ├── user-stories.md             (12 user stories, 36 acceptance criteria)
+│       └── test-plan.md                (38 test cases, 5 categories, 100% coverage)
 └── .claude/
     └── skills/
         ├── requirements-gathering/
