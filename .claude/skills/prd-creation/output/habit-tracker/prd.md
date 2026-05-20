@@ -29,16 +29,48 @@
 
 ## 3. User Roles & Needs
 
-### New Gym Member
+### Workout Newbie
 
-#### Task: Workout 3 times per week
+#### Task: Set a weekly workout plan
 **Gains:**
-- Habit formation
-- Seeing progress in habit formation
+- Clear direction on what to do each day so I don't waste time guessing
+- Accountability knowing exactly what I committed to doing
 
 **Pains:**
-- Not achieving goal
-- Not seeing progress in making this a habit
+- Don't know how often per week I should be working out
+- Overwhelmed choosing which exercises are right for a beginner
+
+#### Task: Log completed workouts consistently
+**Gains:**
+- See visible progress to stay motivated week over week
+- Accountability to myself that I'm actually sticking with it
+
+**Pains:**
+- Logging takes too long and kills momentum after a workout
+- Unsure if I'm doing the exercises correctly or if my form matters
+
+### Gym Rat
+
+#### Task: Track detailed performance metrics across lifts
+**Gains:**
+- See my strength progression over time across all my major lifts
+
+**Pains:**
+- Most apps don't capture the granular details I care about (RPE, velocity, fatigue)
+
+#### Task: Adjust my workout mid-week when equipment is unavailable
+**Gains:**
+- Flexibility to work around equipment constraints without derailing my whole program
+
+**Pains:**
+- Hard to find substitute exercises that properly fit my training cycle and intensity targets
+
+#### Task: Analyze workout trends to optimize my training cycles
+**Gains:**
+- Data-driven insights to identify what's working and refine my programming
+
+**Pains:**
+- Have to manually export data to spreadsheets to run any real analysis
 
 ---
 
@@ -53,10 +85,10 @@
 **Overview:** Users set a weekly workout goal (target number of workouts, days, or duration) when they first open the app or begin a new week. The goal becomes the reference point for the entire week and feeds into progress tracking and achievement confirmation.
 
 **Solves For:**
-- *User Role:* New Gym Member
-- *Task:* Workout 3 times per week
-- *Gains:* Habit formation (by establishing a concrete target)
-- *Pains:* Not achieving goal (provides clarity on what success looks like)
+- *User Role:* Workout Newbie
+- *Task:* Set a weekly workout plan
+- *Gains:* Clear direction on what to do each day; Accountability knowing exactly what I committed to
+- *Pains:* Don't know how often per week I should be working out
 
 **Functional Requirements:**
 - Users can set a numeric goal (e.g., "3 workouts this week").
@@ -93,15 +125,16 @@
 **Overview:** Users quickly log a completed workout with minimal required fields (date, type/name, optional duration/metrics). The log entry is timestamped and added to the user's workout history. Logging should take <30 seconds for a basic entry.
 
 **Solves For:**
-- *User Role:* New Gym Member
-- *Task:* Workout 3 times per week
-- *Gains:* Habit formation (by recording activity)
-- *Pains:* Not achieving goal (logging creates accountability); Not seeing progress (raw data for progress visualization)
+- *User Role:* Workout Newbie
+- *Task:* Log completed workouts consistently
+- *Gains:* See visible progress to stay motivated; Accountability to myself that I'm sticking with it
+- *Pains:* Logging takes too long and kills momentum after a workout
 
 **Functional Requirements:**
 - One-tap "Log Workout" button on the home screen.
 - Minimal form: workout date, workout type/name, optional duration, optional notes.
 - Pre-populated workout types (e.g., "Strength," "Cardio," "Flexibility") with custom entry option.
+- Advanced logging: optional fields for detailed metrics (RPE, reps, weight, velocity, fatigue) for experienced users.
 - Ability to edit or delete logged workouts (within 24 hours or indefinitely, TBD).
 - Offline logging: workouts logged offline sync when connectivity returns.
 
@@ -112,7 +145,7 @@
 
 **Constraints:**
 - *Technical:* Phase 1 does not include integration with wearables or external APIs; metrics entered manually.
-- *Business:* Minimal required fields to reduce friction; detailed metrics (HR, cadence) logged but optional.
+- *Business:* Minimal required fields to reduce friction; detailed metrics (HR, cadence, RPE) logged but optional.
 
 **Success Metrics:**
 - % of completed workouts that are logged (targeting 80%+).
@@ -126,64 +159,24 @@
 
 ---
 
-### Feature: Goal Achievement Confirmation
-
-**Goals:**
-- Celebrate and reinforce achievement when users hit their weekly goal.
-- Provide immediate positive feedback to build motivation and habit reinforcement.
-
-**Overview:** When a user logs their Nth workout (where N = their weekly goal), the app triggers an immediate confirmation message—a celebratory card, notification, or modal—that explicitly acknowledges they've met their goal. This is a high-visibility, satisfying moment designed to reinforce the habit.
-
-**Solves For:**
-- *User Role:* New Gym Member
-- *Task:* Workout 3 times per week
-- *Gains:* Habit formation (reinforcement through celebration)
-- *Pains:* Success criteria (seeing confirmation message that goal was met)
-
-**Functional Requirements:**
-- Confirmation triggers automatically when the user's logged workout count equals the weekly goal for the current week.
-- Confirmation is displayed as a modal/card overlay with:
-  - A celebratory message (e.g., "You've hit your goal!")
-  - Visual celebration (animation, color, icon).
-  - Call-to-action to view weekly summary or log another workout.
-- Confirmation is also logged in the user's history (achievements section or weekly summary).
-- User can dismiss the confirmation and return to the app.
-
-**Non-Functional Requirements:**
-- Confirmation displays in <100ms after the completing log entry is saved.
-- Animation is smooth and runs at 60 fps.
-- Notification is accessible (supports screen readers, high-contrast mode).
-
-**Constraints:**
-- *Technical:* Confirmation logic is client-side; triggered after local verification.
-- *Business:* Phase 1 is a single confirmation per week; advanced gamification (badges, streaks) deferred to Phase 2.
-
-**Success Metrics:**
-- % of users who receive a goal achievement confirmation (should approach 100% for users who meet their goal).
-- User sentiment on confirmation (qualitative feedback, NPS).
-- Frequency of app opens immediately after confirmation (proxy for motivation/engagement).
-
-**Edge Cases & Considerations:**
-- User logs multiple workouts simultaneously (ensure confirmation fires exactly once per week).
-- User deletes a logged workout after reaching their goal (confirmation should retract; goal status updates).
-- User sets a goal of 0 (no confirmation needed).
-- User already has a confirmed goal and logs an additional workout (no duplicate confirmation; note it as "bonus").
-
----
-
 ### Feature: Progress Tracking & Visualization
 
 **Goals:**
 - Show users their progress toward their weekly goal in real time.
 - Provide visibility into long-term habit formation through trends and streak data.
+- Enable experienced athletes to track detailed performance metrics.
 
-**Overview:** Users can view their progress on the home screen (progress bar toward the weekly goal, current count vs. goal) and access a detailed progress view (weekly summary, historical trends, streaks). The progress visualization uses simple, clear metrics: workouts completed this week, completion percentage, longest streak, and weekly history over past 4–12 weeks.
+**Overview:** Users can view their progress on the home screen (progress bar toward the weekly goal, current count vs. goal) and access a detailed progress view with multiple visualization options. The app offers simple summary views for beginners and detailed metric views for advanced users. Users can view historical trends, streaks, and workout-specific performance data.
 
 **Solves For:**
-- *User Role:* New Gym Member
-- *Task:* Workout 3 times per week
-- *Gains:* Habit formation (visibility into progress supports long-term motivation)
+- *User Role:* Workout Newbie
+- *Task:* Log completed workouts consistently
+- *Gains:* See visible progress to stay motivated week over week
 - *Pains:* Not seeing progress in making this a habit
+- *User Role:* Gym Rat
+- *Task:* Track detailed performance metrics across lifts
+- *Gains:* See my strength progression over time across all my major lifts
+- *Pains:* Most apps don't capture the granular details I care about (RPE, velocity, fatigue)
 
 **Functional Requirements:**
 - **Home Screen Widget:** Progress bar showing workouts completed vs. goal (e.g., "2 of 3").
@@ -194,7 +187,12 @@
   - Dates and types of workouts.
 - **Trends View:** Line chart or bar chart showing weekly workout counts over the past 4, 8, or 12 weeks.
 - **Streak Tracker:** Current streak (consecutive weeks goal met), longest streak, days since last workout.
+- **Detailed Metrics View:** For experienced users, display performance data:
+  - Workouts by type (Strength, Cardio, Flexibility).
+  - Detailed lift tracking (weight, reps, RPE, velocity per exercise).
+  - Workout duration trends.
 - Users can toggle between different time ranges (current week, past month, past year).
+- Users can filter by workout type or exercise.
 
 **Non-Functional Requirements:**
 - Progress screen renders in <500ms.
@@ -209,6 +207,7 @@
 - % of active users viewing progress at least weekly.
 - Average time spent on progress views (targeting engagement).
 - User feedback on clarity and usefulness of visualizations.
+- For Gym Rat users: frequency of accessing detailed metrics view.
 
 **Edge Cases & Considerations:**
 - New user with no workout history (show empty state with motivational message and onboarding prompt).
@@ -224,13 +223,17 @@
 - Support real-world adaptation when users need to adjust their workout plan mid-week or on-the-fly.
 - Reduce friction when circumstances change (equipment unavailable, time constraints, injury).
 
-**Overview:** Users can create a planned workout schedule for the week (optional but recommended) and adjust it at any time. When in the gym, users can pivot their planned workout if needed—substituting exercises, changing duration, or switching workout types entirely. Changes to the plan don't penalize progress toward the weekly goal; the focus is on completing workouts, not following a specific plan.
+**Overview:** Users can create a planned workout schedule for the week (optional but recommended) and adjust it at any time. When in the gym, users can pivot their planned workout if needed—substituting exercises, changing duration, or switching workout types entirely. Changes to the plan don't penalize progress toward the weekly goal; the focus is on completing workouts, not following a specific plan. Users can view substitute exercise suggestions that fit their training cycle and intensity targets.
 
 **Solves For:**
-- *User Role:* New Gym Member (secondary; supports real-world habit sustainability)
-- *Task:* Workout 3 times per week
-- *Gains:* Habit formation (flexibility increases adherence)
-- *Pains:* Implicitly addresses the pain of "not achieving goal" by allowing users to adapt when obstacles arise
+- *User Role:* Workout Newbie
+- *Task:* Set a weekly workout plan
+- *Gains:* Flexibility to adapt when circumstances change
+- *Pains:* Overwhelmed choosing which exercises are right for a beginner (plan provides structure, but allows flexibility)
+- *User Role:* Gym Rat
+- *Task:* Adjust my workout mid-week when equipment is unavailable
+- *Gains:* Flexibility to work around equipment constraints without derailing my whole program
+- *Pains:* Hard to find substitute exercises that properly fit my training cycle and intensity targets
 
 **Functional Requirements:**
 - **Workout Plan Creation:** Optional weekly planner where users list planned workouts (date, type, target duration, exercises).
@@ -240,6 +243,7 @@
   - Log a completely different workout type than planned.
   - Log a shorter/longer duration without penalty.
   - Add notes on why they pivoted (optional, for context).
+- **Exercise Substitution Guide:** For experienced users, suggest alternative exercises that match intensity targets and training cycle objectives.
 - **No Penalty for Deviation:** Completion of a workout (any workout) counts toward the weekly goal, regardless of whether it matches the plan.
 
 **Non-Functional Requirements:**
@@ -254,11 +258,57 @@
 - % of users who create a plan.
 - % of logged workouts that deviate from the plan (indicator of real-world adaptation needs).
 - User feedback on flexibility and plan utility.
+- For Gym Rat users: frequency of using exercise substitution suggestions.
 
 **Edge Cases & Considerations:**
 - User creates a plan but never follows it (should not feel penalized; logging is independent of the plan).
 - User deletes all planned workouts for a week (treat as user choice; no prompt/warning unless specifically requested).
 - Plan conflicts (e.g., two workouts scheduled for the same day); allow and show warning/suggestion.
+
+---
+
+### Feature: Advanced Workout Analytics
+
+**Goals:**
+- Enable experienced athletes to analyze trends and optimize their training.
+- Provide data-driven insights without requiring manual export to external tools.
+
+**Overview:** Gym Rat users can access an analytics dashboard that displays workout trends, performance progression, and training cycle insights. The dashboard includes customizable views for analyzing performance data, identifying patterns, and optimizing future programming.
+
+**Solves For:**
+- *User Role:* Gym Rat
+- *Task:* Analyze workout trends to optimize my training cycles
+- *Gains:* Data-driven insights to identify what's working and refine my programming
+- *Pains:* Have to manually export data to spreadsheets to run any real analysis
+
+**Functional Requirements:**
+- **Analytics Dashboard:** View performance trends across multiple dimensions:
+  - Workout frequency by type over time.
+  - Strength progression (weight/reps trends for major lifts).
+  - RPE and fatigue trends to identify recovery needs.
+  - Training cycle analysis (periodization insights).
+- **Custom Reports:** Users can generate custom reports by date range, workout type, or exercise.
+- **Data Export:** Option to export workout data in CSV or other formats for further analysis (optional).
+- **Insights Engine:** Generate automated insights (e.g., "Your bench press max increased 10% over 8 weeks" or "Your recovery metrics suggest deload week soon").
+
+**Non-Functional Requirements:**
+- Analytics dashboard loads in <1 second.
+- Report generation completes in <5 seconds.
+- Charts support large datasets (1000+ workout entries).
+
+**Constraints:**
+- *Technical:* Phase 1 supports basic aggregations and trending; advanced ML-driven predictions deferred to Phase 2.
+- *Business:* Advanced analytics available to all users; premium insights (e.g., coaching recommendations) potentially gated.
+
+**Success Metrics:**
+- % of experienced users accessing analytics (targeting 60%+).
+- Frequency of analytics view (engaged users viewing weekly or more).
+- User sentiment on insights quality and actionability.
+
+**Edge Cases & Considerations:**
+- User with sparse data (few entries); show message encouraging more logging.
+- User with inconsistent logging format (e.g., missing metrics); still allow analysis but flag incomplete data.
+- Large gaps in workout history; handle gaps gracefully in trending views.
 
 ---
 
@@ -312,6 +362,11 @@
 - Users with 4+ week streak (goal met consecutively).
 - Users with 10+ week streak (sustained habit).
 
+### Feature Adoption
+- % of users creating a workout plan.
+- % of experienced users accessing advanced analytics.
+- % of users utilizing flexible plan adjustments.
+
 ### Satisfaction
 - Net Promoter Score (NPS) via in-app surveys.
 - App Store rating (targeting 4.5+ stars).
@@ -327,13 +382,4 @@
 5. **Premium Features:** Are there premium/paid features planned (advanced analytics, personalized coaching), or is the app free-to-use?
 6. **Data Retention:** How long should workout logs be retained? Indefinite, or subject to archival after 1-2 years?
 7. **Plan Recurrence:** Should workout plans be repeatable weekly, or manually recreated each week?
-
----
-
-## Appendix: Traceability
-
-- **Weekly Goal Setting** → New Gym Member, Task: Workout 3x/week, Gains: Habit formation, Pains: Not achieving goal
-- **Workout Logging** → New Gym Member, Task: Workout 3x/week, Gains: Habit formation, Pains: Not achieving goal; Not seeing progress
-- **Goal Achievement Confirmation** → New Gym Member, Task: Workout 3x/week, Success Criteria: Seeing confirmation message, Gains: Habit formation
-- **Progress Tracking & Visualization** → New Gym Member, Task: Workout 3x/week, Gains: Habit formation, Pains: Not seeing progress
-- **Flexible Plan Management** → New Gym Member, Task: Workout 3x/week (implicitly supports real-world adherence), Gains: Habit formation
+8. **Form & Exercise Validation:** For Newbies concerned about exercise form, should the app provide form guidance (videos, tips)? Phase 1 or Phase 2?
