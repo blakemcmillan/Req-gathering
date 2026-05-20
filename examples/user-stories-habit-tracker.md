@@ -357,4 +357,393 @@ And they can edit the swap for future reference
 
 ---
 
+## Feature: Streak Engine & Habit Logger
+
+### 🆔 Quick Habit Logging
+- **PRD Reference:** Streak Engine Core Feature - Pain: "I forget what I did today"
+- **Story ID:** `US-HT-STRK-001`
+
+**User Story:**
+- **As a** habit tracker user
+- **I want to** record a completed habit with a single tap (checkbox or button)
+- **So that** I maintain an accurate historical log and build momentum toward a streak
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-001-01` User logs a habit successfully**
+  - **Given** user is on the home dashboard and a habit exists in their profile (e.g., "Drank 8 glasses of water")
+  - **When** user taps the habit checkbox or "Log Completion" button with current date/time
+  - **Then** the log entry is saved to the database and persists within 1.0 second
+  - **And** the UI displays confirmation: "✓ Logged at [HH:MM]" for 2 seconds, then fades
+  - **And** the database timestamp is recorded in UTC
+
+- **`AC-HT-STRK-001-02` Logging works offline with sync-on-reconnect**
+  - **Given** user has no internet connection
+  - **When** user taps the habit checkbox
+  - **Then** the app displays "Saved locally. Will sync when online."
+  - **And** the log is queued in local storage
+  - **And** when the device reconnects, the log automatically syncs within 5 seconds without user action
+  - **And** the habit is attributed to the correct date (today, not sync date)
+
+- **`AC-HT-STRK-001-03` User cannot log the same habit twice in one day**
+  - **Given** user already logged "Gym Session" on May 20
+  - **When** user attempts to log "Gym Session" again on May 20 (same day, same habit)
+  - **Then** the button becomes disabled or shows "Already logged today"
+  - **And** a tap shows a tooltip: "You logged this on May 20 at 7:15 PM. Tap to edit or delete that entry."
+
+---
+
+### 🆔 Streak Display & Tracking
+- **PRD Reference:** Streak Engine - Value: "Keep people hooked via Current Streak counter"
+- **Story ID:** `US-HT-STRK-002`
+
+**User Story:**
+- **As a** habit tracker user
+- **I want to** see my current streak and all-time best streak prominently on the home screen
+- **So that** I stay motivated and see my progress at a glance
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-002-01` Current streak displays accurately**
+  - **Given** user has logged the same habit on 7 consecutive days (May 14–20)
+  - **When** they open the home dashboard
+  - **Then** the habit card displays: "🔥 Current Streak: 7 days" in a large, prominent font (18px+)
+  - **And** the streak number is in a bold, contrasting color (e.g., orange/red)
+  - **And** the display updates instantly (< 500ms) when a new log is recorded
+
+- **`AC-HT-STRK-002-02` All-time best streak is displayed**
+  - **Given** user's highest consecutive streak was 30 days (achieved in March)
+  - **When** they view a habit card
+  - **Then** below the current streak, "Best: 30 days" is shown in smaller text (12px)
+  - **And** the best streak shows the month/year it was achieved: "Best: 30 days (Mar 2026)"
+
+- **`AC-HT-STRK-002-03` Streak breaks correctly after a missed day**
+  - **Given** user logged the habit for 5 consecutive days ending May 19
+  - **When** May 20 ends (11:59 PM local time) without a log entry
+  - **Then** the current streak resets to 0
+  - **And** the habit card shows: "Streak broken. Start a new one!" with a "Log Now" button
+  - **And** the broken streak is recorded in history (for recovery tracking)
+
+- **`AC-HT-STRK-002-04` Streak persists across app sessions**
+  - **Given** user logged on May 19 and May 20
+  - **When** they close the app and reopen it 6 hours later (still May 20)
+  - **Then** the current streak still shows "2 days"
+  - **And** the habit remains eligible for logging (day not complete)
+
+---
+
+### 🆔 Timezone & Midnight Reset Handling
+- **PRD Reference:** Streak Engine - Pain: "Night owls lose streaks when logging after midnight"
+- **Story ID:** `US-HT-STRK-003`
+
+**User Story:**
+- **As a** night shift worker or someone in a timezone different from the server
+- **I want to** log habits with a grace period until 3:00 AM local time before the day resets
+- **So that** I don't lose my streak for being awake at an unconventional time
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-003-01` Grace period extends until 3:00 AM local time**
+  - **Given** user is in PST (UTC-7) and logs a workout at 2:15 AM on May 21
+  - **When** they tap the "Gym Session" checkbox
+  - **Then** the system records it as May 20 (still "today" in their timezone grace window)
+  - **And** the streak is calculated as if logged on May 20, not May 21
+  - **And** the log entry displays: "Logged on May 20 at 2:15 AM"
+
+- **`AC-HT-STRK-003-02` Logs after 3:00 AM local time count as next day**
+  - **Given** same user in PST logs at 3:15 AM on May 21
+  - **When** they tap the habit checkbox
+  - **Then** the system records it as May 21 (past the grace window)
+  - **And** if they didn't log on May 20, the streak breaks
+  - **And** a new streak can start on May 21
+
+- **`AC-HT-STRK-003-03` Server uses UTC internally, local display is user-specific**
+  - **Given** user A (PST) and user B (EST) both log at their local "2:30 AM" on May 21
+  - **When** the backend stores both entries
+  - **Then** the database records different UTC timestamps (user A's 2:30 AM PST ≈ 9:30 AM UTC; user B's ≈ 6:30 AM UTC)
+  - **And** both users see "May 20" in their app (within grace window)
+  - **And** the UI always displays local time to each user
+
+- **`AC-HT-STRK-003-04` Timezone changes are handled gracefully**
+  - **Given** user travels from PST to EST (3-hour time difference)
+  - **When** they log a habit at 1:00 AM on May 21 EST (first time in EST)
+  - **Then** the system recognizes the timezone shift via device settings
+  - **And** the grace window applies to the NEW timezone (EST, not PST)
+  - **And** the log is recorded correctly without breaking the streak
+
+---
+
+### 🆔 Streak Freeze Feature
+- **PRD Reference:** Streak Engine - Gain: "Safety net for illness/vacation without losing streaks"
+- **Story ID:** `US-HT-STRK-004`
+
+**User Story:**
+- **As a** dedicated habit tracker user
+- **I want to** use a "Streak Freeze" token to pause a streak for 1 day without breaking it
+- **So that** I can protect my streaks during illness, vacation, or unexpected life events
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-004-01` Regular user gets 1 free freeze per month**
+  - **Given** a free-tier user on May 20 with an active 15-day streak
+  - **When** they tap the habit and select "Freeze Streak" (or menu → Streak Options)
+  - **Then** they see: "You have 1 freeze available this month. Use now?"
+  - **And** if they confirm, the freeze is applied
+  - **And** they can skip logging for May 21 without the streak breaking
+  - **And** on May 22, the streak resumes at 16 days (May 21 is skipped, not broken)
+
+- **`AC-HT-STRK-004-02` Premium user gets 3 freezes per month**
+  - **Given** a premium subscriber with an active 25-day streak
+  - **When** they tap "Freeze Streak"
+  - **Then** they see: "You have 3 freezes available this month. Use now?"
+  - **And** they can freeze up to 3 separate days per month
+  - **And** freezes reset on the 1st of each month
+
+- **`AC-HT-STRK-004-03` Freezes can be earned at 30-day milestone**
+  - **Given** a user just hit a 30-day streak for the first time
+  - **When** the 30-day milestone achievement unlocks
+  - **Then** a popup shows: "Milestone unlocked! +1 Bonus Freeze Token earned."
+  - **And** the free-tier user now has 2 freezes available (1 monthly + 1 bonus)
+  - **And** the bonus does not reset monthly (permanent)
+
+- **`AC-HT-STRK-004-04` Freeze prevents streak break, not activity**
+  - **Given** a user has frozen a streak for May 21
+  - **When** May 21 ends without a log entry
+  - **Then** the streak count remains the same (e.g., 25 days)
+  - **And** May 21 is marked as [FROZEN] in the habit history (not blank)
+  - **And** if the user logs on May 21 anyway (feels better), the log is recorded and counts
+  - **And** the freeze is still consumed (used up for the month)
+
+---
+
+### 🆔 Instant Streak Recalculation Performance
+- **PRD Reference:** Streak Engine - Technical Requirement: "Streak count recalculates instantly < 1 second"
+- **Story ID:** `US-HT-STRK-005`
+
+**User Story:**
+- **As a** habit tracker user
+- **I want to** see my streak count update instantly when I log a habit
+- **So that** the app feels snappy and I get immediate gratification
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-005-01` Streak updates in < 1.0 second after logging**
+  - **Given** user is on the home dashboard with a visible habit card showing "Current Streak: 4 days"
+  - **When** they tap the checkbox to log the habit
+  - **Then** the UI displays a checkmark within 300ms
+  - **And** within 1.0 second total, the streak count updates to "5 days"
+  - **And** no loading spinner or "recalculating..." message is shown (instant update)
+
+- **`AC-HT-STRK-005-02` Recalculation happens server-side, optimistic UI update client-side**
+  - **Given** user taps to log a habit
+  - **When** the tap is registered
+  - **Then** the UI immediately updates locally (optimistic update)
+  - **And** the request is sent to the server in the background
+  - **And** if the server confirms success, the state persists
+  - **And** if the server rejects (e.g., duplicate log), the UI reverts within 500ms
+  - **And** a brief toast message shows: "Couldn't log. Already logged today."
+
+- **`AC-HT-STRK-005-03` Streak recalc includes logic for grace period & freezes**
+  - **Given** user's data includes: current streak, frozen days, timezone offset, past logs
+  - **When** they log a new habit
+  - **Then** the recalculation:
+    1. Checks for duplicates (same habit, same calendar day)
+    2. Applies timezone grace window (until 3 AM local)
+    3. Honors streak freezes (skipped days don't break chain)
+    4. Increments current streak if consecutive
+    5. Stores timestamp in UTC
+  - **And** all calculations complete in < 500ms server-side
+
+- **`AC-HT-STRK-005-04` Cache strategy prevents thundering herd**
+  - **Given** 1000 users try to log a habit at the same time (e.g., 12:00 PM noon)
+  - **When** the requests hit the server
+  - **Then** streak calculations are cached at the user level (no cross-user contention)
+  - **And** database queries use indexed lookups (user_id, habit_id, date)
+  - **And** 95th percentile response time remains < 1.0 second even under load
+
+---
+
+### 🆔 Milestone Celebrations & Gamification
+- **PRD Reference:** Streak Engine - Gain: "Visual celebration at 3, 7, 30-day milestones"
+- **Story ID:** `US-HT-STRK-006`
+
+**User Story:**
+- **As a** habit tracker user
+- **I want to** receive visual celebrations (badges, confetti, notifications) when I hit streak milestones
+- **So that** I feel recognized for my progress and stay motivated
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-006-01` 3-day milestone triggers celebration popup**
+  - **Given** user just logged their 3rd consecutive day of a habit
+  - **When** the streak updates to "3 days"
+  - **Then** a full-screen modal appears with:
+    - Animated confetti falling for 2–3 seconds
+    - Badge image: "🔥 3-Day Streak!"
+    - Message: "Nice work! You're on fire."
+    - Sound effect (optional, can be muted)
+    - "Continue" button to dismiss
+  - **And** the badge is added to their profile/trophy case
+
+- **`AC-HT-STRK-006-02` 7-day and 30-day milestones unlock premium rewards**
+  - **Given** user reaches a 7-day streak
+  - **When** the celebration popup appears
+  - **Then** it shows: "7-Day Streak Unlocked! Bonus: +1 Freeze Token"
+  - **And** the token is credited to their account immediately
+  - **And** for 30-day: "30-Day Legend! Unlock premium badge."
+  - **And** the badge appears in their profile with date achieved
+
+- **`AC-HT-STRK-006-03` Celebration only triggers once per milestone**
+  - **Given** user hit the 7-day milestone on May 20
+  - **When** they log again on May 21 (streak now 8 days)
+  - **Then** no celebration popup appears
+  - **And** the 7-day badge remains in their trophy case, not repeated
+
+- **`AC-HT-STRK-006-04` Milestone celebration can be dismissed**
+  - **Given** a celebration popup is displayed
+  - **When** user taps "Continue" or the X button
+  - **Then** the popup closes immediately (< 200ms)
+  - **And** the app returns to the home dashboard
+  - **And** the achievement is recorded in history
+
+---
+
+### 🆔 Micro-Calendar View (Last 7 Days)
+- **PRD Reference:** Streak Engine - UI Feature: "Visual momentum via last 7 days calendar"
+- **Story ID:** `US-HT-STRK-007`
+
+**User Story:**
+- **As a** habit tracker user
+- **I want to** see a micro-calendar showing the last 7 days with visual indicators (✓ or ○)
+- **So that** I can visually assess my momentum and identify gaps at a glance
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-007-01` Micro-calendar displays last 7 days horizontally**
+  - **Given** user is viewing a habit card (e.g., "Gym Session")
+  - **When** they open the habit detail or scroll within the card
+  - **Then** a 7-day horizontal calendar is visible:
+    - Days shown: Sun, Mon, Tue, Wed, Thu, Fri, Sat (most recent on right)
+    - Green checkmark (✓) for days logged
+    - Gray empty circle (○) for days not logged
+    - Current day is highlighted with a border
+    - Dates are shown below each day (e.g., "May 20")
+  - **And** the calendar is responsive and scales to screen width
+
+- **`AC-HT-STRK-007-02` Clicking a day shows log details**
+  - **Given** user sees the 7-day calendar
+  - **When** they tap a green checkmark (logged day)
+  - **Then** a tooltip or popup shows:
+    - Date: "May 20"
+    - Time logged: "7:15 PM"
+    - Optional notes: [if entered by user]
+  - **And** they can tap "Edit" to modify the entry
+  - **And** when they tap a gray circle (not logged), it shows: "Not logged. Log now?"
+
+- **`AC-HT-STRK-007-03` Calendar updates in real-time**
+  - **Given** user is viewing the 7-day calendar
+  - **When** they log a new entry (tap checkbox)
+  - **Then** the corresponding day updates to green checkmark immediately (< 300ms)
+  - **And** the streak counter increments simultaneously
+
+- **`AC-HT-STRK-007-04` Frozen days are visually distinct**
+  - **Given** user has frozen a streak day (e.g., May 18)
+  - **When** they view the 7-day calendar
+  - **Then** May 18 shows a snowflake icon (❄) instead of ✓ or ○
+  - **And** hovering/tapping the snowflake shows: "Streak Frozen - no activity required"
+
+---
+
+### 🆔 Habit Logger Core
+- **PRD Reference:** Streak Engine - Core Feature: "Simple checkbox UI for daily habit logging"
+- **Story ID:** `US-HT-STRK-008`
+
+**User Story:**
+- **As a** any habit tracker user
+- **I want to** have a simple, large, tappable checkbox or button next to each habit
+- **So that** I can log habits with minimal friction (single tap)
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-008-01` Checkbox is large and easy to tap**
+  - **Given** user is on the home dashboard
+  - **When** they view a habit list
+  - **Then** each habit has a large checkbox (minimum 48px × 48px) or "Log" button
+  - **And** the button uses high contrast colors (e.g., white background, green checkbox)
+  - **And** the tap target meets accessibility standards (WCAG 2.1 Level AA)
+
+- **`AC-HT-STRK-008-02` Habit label clearly describes the action**
+  - **Given** a habit card is displayed
+  - **When** user reads the habit text
+  - **Then** the text is clear and actionable, e.g.:
+    - ✅ "Drank 8 glasses of water"
+    - ✅ "Hit the gym"
+    - ✅ "Meditated 10 minutes"
+    - ❌ "Health" (too vague)
+    - ❌ "Exercise" (too vague)
+
+- **`AC-HT-STRK-008-03` Logged habits show visual feedback**
+  - **Given** a habit has been logged today
+  - **When** user views the habit card
+  - **Then** the checkbox is checked (✓) or the button shows "Logged ✓"
+  - **And** the button is disabled (grayed out or shows "Already logged today")
+  - **And** the habit card has a subtle background highlight (light green)
+
+- **`AC-HT-STRK-008-04` Unlogged habits are visually distinct**
+  - **Given** a habit has not been logged today
+  - **When** user views the habit card
+  - **Then** the checkbox is empty (○) or the button shows "Log"
+  - **And** the button is clickable and has a call-to-action color (e.g., blue, orange)
+  - **And** the card background is neutral (white or light gray)
+
+---
+
+### 🆔 Habit Reminders & Notifications
+- **PRD Reference:** Streak Engine - Separate System: "Push notifications to remind users about streaks"
+- **Story ID:** `US-HT-STRK-009`
+
+**User Story:**
+- **As a** a habit tracker user
+- **I want to** receive push notifications reminding me to log habits
+- **So that** I don't forget and break my streaks
+
+#### Acceptance Criteria:
+
+- **`AC-HT-STRK-009-01` Notifications are sent at user-defined time**
+  - **Given** user has set a reminder time for "Gym Session" at 6:00 PM
+  - **When** 6:00 PM arrives (in user's local timezone)
+  - **Then** a push notification is sent: "Remember your streak! Time to hit the gym. 🔥"
+  - **And** the notification is delivered within 2 minutes of the set time
+  - **And** the user can tap the notification to open the app and log
+
+- **`AC-HT-STRK-009-02` Notifications adapt based on streak status**
+  - **Given** user has a 5-day active streak
+  - **When** the reminder notification is sent
+  - **Then** the message reads: "Don't break your 5-day streak! Time to gym. 🔥"
+  - **And** for a new habit (1-day streak): "Great start! Keep it up. Time to gym. 💪"
+  - **And** for a frozen streak: "Your streak is frozen. No pressure today—rest up!"
+
+- **`AC-HT-STRK-009-03` Notifications respect quiet hours**
+  - **Given** user has set quiet hours from 10:00 PM to 8:00 AM
+  - **When** a reminder is scheduled for 11:00 PM
+  - **Then** the notification is NOT sent at 11:00 PM
+  - **And** the notification is queued and sent at 8:05 AM (first opportunity after quiet hours)
+  - **And** the user receives an alert: "Reminder queued. Will notify at 8:05 AM."
+
+- **`AC-HT-STRK-009-04` Users can opt out of notifications per habit**
+  - **Given** user is viewing a habit card
+  - **When** they tap "Settings" for that habit
+  - **And** they toggle "Reminders" OFF
+  - **Then** no notifications are sent for that habit
+  - **And** they can re-enable by toggling ON again
+
+- **`AC-HT-STRK-009-05` Notification system is decoupled from logging**
+  - **Given** the notification service is down or delayed
+  - **When** user logs a habit manually (via the app)
+  - **Then** the logging works as normal (streak updates, etc.)
+  - **And** the notification failure does NOT block or delay logging
+  - **And** when the notification service recovers, pending notifications are sent
+
+---
+
 *Generated via User Story Expansion Skill*
