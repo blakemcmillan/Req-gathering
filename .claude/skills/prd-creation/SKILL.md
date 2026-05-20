@@ -2,9 +2,19 @@
 name: prd-creation
 description: Generate a production-quality PRD from gathered requirements
 keywords: [create prd, make prd, create project requirements document, make project requirements document]
+argument-hint: "[file path to requirements document]"
+allowed-tools: Read, Write
 ---
 
 # PRD Generation Skill
+
+## Input & Output
+
+**Input:** Path to requirements document (e.g., `/output/habit-tracker/requirements.md`)
+
+**Output:** Save PRD to `/output/<project_name>/prd.md`
+
+---
 
 ## Initial Gate: Do You Have Requirements?
 

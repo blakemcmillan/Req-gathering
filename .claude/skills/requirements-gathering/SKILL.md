@@ -2,9 +2,19 @@
 name: requirements-gathering
 description: Interactively gather user needs through structured discovery of roles, tasks, gains, and pains
 keywords: [gather requirements, user interview, product discovery]
+argument-hint: "[product name or concept]"
+allowed-tools: Read, Write
 ---
 
 # Requirements Discovery Skill
+
+## Input & Output
+
+**Input:** Product name or concept description
+
+**Output:** Save requirements to `/output/<product_name>/requirements.md`
+
+---
 
 ## Initial Setup
 
