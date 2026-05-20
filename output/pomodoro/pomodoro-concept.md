@@ -1,0 +1,3 @@
+# Pomodoro Timer — Product Concept
+
+Build a lightweight productivity application that helps knowledge workers and students maintain deep focus through structured work intervals and intentional breaks. Users should be able to start focused work sessions, track completed Pomodoros across multiple tasks, customize session length and break duration, and view productivity trends over time. The product should serve both casual users seeking basic time management and power users who need detailed analytics on focus patterns and task breakdown. Support flexible task switching, break activities tracking, and integration with existing task lists to minimize context switching.
