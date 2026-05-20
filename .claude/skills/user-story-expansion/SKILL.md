@@ -77,10 +77,8 @@ Scenario: [scenario title]
 Generate a single `.md` file for the entire product:
 
 ```
-user-stories-<product_name>.md
+/output/<product_name>/user-stories.md
 ```
-
-Save to the root directory where this skill was invoked.
 
 ---
 

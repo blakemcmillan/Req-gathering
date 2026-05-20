@@ -114,10 +114,8 @@ Key principles:
 Save the complete PRD to:
 
 ```
-prd-<product_name>.md
+/output/<product_name>/prd.md
 ```
-
-in the root directory where this skill was invoked.
 
 Display the PRD in the conversation.
 
@@ -125,4 +123,4 @@ Display the PRD in the conversation.
 
 ## Handoff Complete
 
-The PRD is now ready for downstream stages (architecture, UX, epic creation).
+The PRD is now ready for downstream stages (user story expansion, test planning).
