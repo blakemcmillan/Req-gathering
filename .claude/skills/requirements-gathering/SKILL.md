@@ -100,12 +100,12 @@ Display the discovered data as a Value Prop Canvas (user side) using the same st
 
 ## Output & Handoff
 
-Save the discovery data to `requirements-<product_name>.md` in `/Users/blakemcmillan/Documents/VSCode/Req-gathering/` using the structure captured during discovery (user roles → jobs → gains/pains).
+Save the discovery data to `/output/<product_name>/requirements.md` using the structure captured during discovery (user roles → jobs → gains/pains).
 
 Then offer:
 
 **Ready for me to create your PRD based on this discovery?**
-- If yes → Invoke prd-generation skill with product_name parameter
+- If yes → Invoke prd-creation skill
 - If no → End skill
 
 ---

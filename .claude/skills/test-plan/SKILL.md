@@ -11,7 +11,7 @@ Transform the following user stories, acceptance criteria, or PRD into a compreh
 
 **Input:** $ARGUMENTS
 
-**Output Filename:** Create filename from feature/project name by converting to lowercase and replacing spaces with hyphens. Save to `/outputs/test-plan/[test-plan-name].md`
+**Output Filename:** Create filename from feature/project name. Save to `/output/<project_name>/test-plan.md`
 
 ---
 
@@ -228,7 +228,7 @@ Tags: @integration @core-flow @REQ-PLANNING-01-SC2
    - Requirement ID → Description → Test IDs → Coverage Status
    - Identify gaps
 
-8. **Save output** to `/outputs/test-plan/[project-name].md`
+8. **Save output** to `/output/<project_name>/test-plan.md`
 
 9. **Include summary** with:
    - Total test cases by category
