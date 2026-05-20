@@ -15,6 +15,18 @@ Transform the following user stories, acceptance criteria, or PRD into a compreh
 
 ---
 
+## Key Constraint
+
+**Only include technical details or stack information if explicitly provided in the input.** 
+Do not infer, assume, or add:
+ - Technology stacks (languages, frameworks, databases)
+ - CI/CD platforms or tools
+ - Testing frameworks or tools
+ - Infrastructure or deployment details
+ - Cloud platforms or services
+
+If the input does not mention these, the test plan should remain stack-agnostic and focus purely on test strategy, test cases, and coverage.
+
 ## Test Plan Structure
 
 Create a detailed test plan with these sections:
@@ -46,34 +58,45 @@ Create a detailed test plan with these sections:
 - Performance tests: Run weekly or before releases
 - Failed tests: Block merges to main
 
-*Dependencies & Tools:*
-- Testing framework: [pytest, Jest, Cucumber, etc.]
-- Mock/stub libraries: [list specific]
-- Database: [test database type]
-- API mocking: [tool name]
-- Performance monitoring: [tool name]
-- Coverage reporting: [tool name, e.g., Codecov]
+*Dependencies & Tools (only if provided in input):*
+- Testing framework: [use if specified in requirements]
+- Mock/stub libraries: [use if specified in requirements]
+- Database: [use if specified in requirements]
+- API mocking: [use if specified in requirements]
+- Performance monitoring: [use if specified in requirements]
+- Coverage reporting: [use if specified in requirements]
 
-*Coverage Goals:*
-- Unit tests: ≥80% code coverage
-- Integration tests: ≥60% critical workflows
+*Coverage Goals (recommended baselines, adjust by project risk):*
+- Unit tests: 80%+ code coverage (target for critical paths)
+- Integration tests: 60%+ critical workflow coverage
 - E2E tests: 100% of acceptance criteria scenarios
-- Overall: ≥75% combined code coverage
+- Overall: 75%+ combined coverage (adjust based on risk profile)
+
+*Test Data Strategy:*
+- **Unit tests:** Use mocks and stubs for dependencies; test with boundary values and invalid inputs
+- **Integration tests:** Use test fixtures or seeded test database; reset state between runs
+- **E2E tests:** Use real or production-like staging environment; seed with realistic user workflows
+- **Edge cases:** Include data edge cases (empty, null, max values, special characters)
+- **Performance tests:** Use representative data volumes; simulate realistic user loads
 
 **Test Objectives**
-- Primary testing goals
-- Quality criteria
-- Risk areas to focus on
+
+Extract from input:
+- What quality standards must be met (performance targets, reliability, usability)
+- Which user workflows are critical (user personas, happy paths)
+- Known risk areas or past issues to prevent regression
 
 **Test Scope**
 
 *In Scope:*
-- Features to be tested
-- User scenarios from acceptance criteria
+- All features and user scenarios explicitly mentioned in input
+- All acceptance criteria from user stories
+- Data flows and integrations described in requirements
 
 *Out of Scope:*
-- What's not being tested
-- Known limitations
+- Features explicitly excluded or marked "future"
+- Third-party integrations not controlled by this team
+- Infrastructure/DevOps configuration (unless testing it directly)
 
 **Requirement Traceability**
 
@@ -90,100 +113,54 @@ REQ-PLANNING-01: Guided Workout Planning feature
 
 **Test Categories**
 
-### 1. Unit Tests (Dev Team - Owned)
+*Categorization guide:*
+- **Unit:** Tests a single function/component in isolation? → Unit
+- **Integration:** Tests interaction between 2+ components, database, or external systems? → Integration
+- **E2E:** Tests a complete user workflow from start to finish? → E2E
+- **Edge Case:** Tests boundary conditions, invalid input, or error scenarios? → Edge Case
+- **Performance:** Tests response time, throughput, or load handling? → Performance
+
+### 1. Unit Tests (Dev Team)
 - Individual component/function testing
 - Data validation and business logic
 - Boundary conditions and edge cases
-- **Format:** Brief strategy, no Gherkin
 - **Ownership:** Development Team (automated, pre-commit)
-- **Coverage Goal:** ≥80% code coverage
 - **Execution:** On every commit via CI pipeline
-- **Example Format:**
-  ```
-  TC-UNIT-001: Workout completion % calculation
-  Strategy: Test calculation logic with 0%, 50%, 100% completion
-  Coverage: Validates WorkoutCompletion.calculate_percentage() logic
-  Owned by: Dev Team
-  ```
+- **Format:** Gherkin Given/When/Then
 
-### 2. Integration Tests (QA Team - Owned)
+### 2. Integration Tests (QA Team)
 - Feature workflow testing
 - Cross-component interactions
 - API/database interactions
 - Data flow verification
-- **Format:** Gherkin Given/When/Then
 - **Ownership:** QA Team (automated, post-merge)
-- **Coverage Goal:** ≥60% of critical workflows
 - **Execution:** On PR merge, nightly
-- **Scenario titles:** "User [action] and [system updates correctly]"
+- **Format:** Gherkin Given/When/Then
 
-### 3. End-to-End (E2E) Tests (QA Team - Owned)
+### 3. End-to-End (E2E) Tests (QA Team)
 - Full user journey scenarios (derived from acceptance criteria)
 - Real user workflows
 - Multi-step processes
-- **Format:** Gherkin Given/When/Then
 - **Ownership:** QA Team (manual + automated)
-- **Coverage Goal:** 100% of acceptance criteria scenarios
 - **Execution:** Nightly or on-demand, before releases
-- **Scenario titles:** "User completes [full workflow]"
+- **Format:** Gherkin Given/When/Then
 
-### 4. Edge Case & Error Handling Tests (QA Team - Owned)
+### 4. Edge Case & Error Handling Tests (QA Team)
 - Boundary conditions
 - Invalid inputs
 - Network/offline scenarios
 - Concurrency issues
-- **Format:** Gherkin Given/When/Then
 - **Ownership:** QA Team (mostly manual)
-- **Coverage Goal:** ≥90% of documented edge cases
 - **Execution:** Before release, on-demand
-- **Scenario titles:** "System handles [edge case]" or "User [action] in [unusual condition]"
+- **Format:** Gherkin Given/When/Then
 
-### 5. Performance & Load Tests (DevOps/QA - Owned)
+### 5. Performance & Load Tests (DevOps/QA)
 - Response time requirements
 - Concurrent user handling
 - Data volume handling
-- **Format:** Gherkin with timing constraints
 - **Ownership:** DevOps/QA Team (automated)
-- **Coverage Goal:** All critical paths < target time
 - **Execution:** Weekly or before releases
-- **Scenario titles:** "[Feature] completes within [time constraint]"
-
----
-
-## Test Case Format (Gherkin)
-
-Use Gherkin syntax with requirement traceability:
-
-```gherkin
-Scenario: [Clear description of test scenario]
-  Given [initial context or precondition]
-  When [action the user takes]
-  And [additional action or condition]
-  Then [expected outcome/result]
-  And [additional expected outcome]
-```
-
-**Test ID:** [TC-CATEGORY-###]
-
-**Requirement Traceability:** REQ-[FEATURE]-[SC#] or REQ-[FEATURE]-[Scenario-ID]
-
-**Tags:** @[category] @[priority] @[requirement-id]
-
-Example:
-
-```gherkin
-Scenario: User can select beginner template and customize exercise
-  Given a beginner user on the planning screen
-  When they tap "Use Template" and select "Full Body 3x/week"
-  And they remove the barbell bench press from Tuesday
-  And they select "Dumbbell press" instead
-  Then the modified plan reflects the new exercise
-  And the original template remains unchanged
-
-Test ID: TC-PLANNING-002
-Requirement Traceability: REQ-PLANNING-01-SC2 (Beginner Customizes a Template)
-Tags: @integration @core-flow @REQ-PLANNING-01-SC2
-```
+- **Format:** Gherkin with timing constraints
 
 ---
 
@@ -202,7 +179,12 @@ Tags: @integration @core-flow @REQ-PLANNING-01-SC2
    - Assign REQ-IDs: REQ-[FEATURE-PREFIX]-[Number] for features
    - Assign scenario IDs: REQ-[FEATURE-PREFIX]-SC[#]
 
-4. **Categorize scenarios** - Map each to test categories (unit, integration, E2E, edge case, performance)
+4. **Categorize scenarios** - Map each to test categories using the decision tree:
+   - Single function/component in isolation? → Unit
+   - Interaction between components/systems? → Integration
+   - Complete user workflow end-to-end? → E2E
+   - Boundary conditions or error handling? → Edge Case
+   - Response time or load requirements? → Performance
 
 5. **Generate test cases**:
    - **Unit Tests** (Dev Team): Use brief strategy format, NO Gherkin
@@ -224,42 +206,20 @@ Tags: @integration @core-flow @REQ-PLANNING-01-SC2
    - Add "Owned by: [Team]" field
    - Include relevant tags
 
-7. **Create Traceability Matrix** - Table showing:
-   - Requirement ID → Description → Test IDs → Coverage Status
-   - Identify gaps
+7. **Save output** to `/output/<project_name>/test-plan.md`
 
-8. **Save output** to `/output/<project_name>/test-plan.md`
-
-9. **Include summary** with:
+8. **Include summary** with:
    - Total test cases by category
    - Coverage by feature and overall %
    - Ownership breakdown (Dev/QA/DevOps test count)
    - Estimated effort by test type
 
----
-
-## Requirement Traceability Matrix Example
-
-Include this in your test plan output:
-
-```
-| Requirement ID | Description | Test Case IDs | Coverage |
-|---|---|---|---|
-| REQ-PLANNING-01 | Guided Workout Planning | TC-PLANNING-001, TC-PLANNING-002, TC-PLANNING-003 | ✓ Complete |
-| REQ-PLANNING-01-SC1 | Beginner selects pre-built template | TC-PLANNING-001 | ✓ Covered |
-| REQ-PLANNING-01-SC2 | Beginner customizes template | TC-PLANNING-002, TC-PLANNING-004 | ✓ Covered |
-| REQ-PLANNING-01-SC3 | Experienced user builds custom | TC-PLANNING-003 | ✓ Covered |
-| REQ-PLANNING-01-SC4 | Exercise description guidance | TC-PLANNING-005, TC-UNIT-001 | ✓ Covered |
-| REQ-PLANNING-01-SC5 | Plan modification timeline | TC-PLANNING-006 | ✓ Covered |
-| REQ-LOGGING-01 | Quick Workout Logging | TC-LOGGING-001, TC-LOGGING-002, TC-LOGGING-003 | ✓ Complete |
-| REQ-LOGGING-01-SC1 | User logs completed workout | TC-LOGGING-001 | ✓ Covered |
-| REQ-LOGGING-01-SC2 | User logs detailed metrics | TC-LOGGING-002 | ✓ Covered |
-| REQ-LOGGING-01-SC3 | Partial workout completion | TC-LOGGING-003 | ✓ Covered |
-
-**Coverage Summary:** 20 of 20 requirements covered (100%)
-**Gap Analysis:** No uncovered requirements
-**Test Count by Category:** Unit: 8, Integration: 12, E2E: 6, Edge Case: 4, Total: 30
-```
+**Handling incomplete input:**
+- If tools/stack not specified, skip the Dependencies section or mark as "TBD"
+- If roles/ownership not mentioned, default to: Dev Team = unit tests, QA Team = integration/E2E/edge cases, DevOps = performance/infrastructure
+- If coverage targets not provided, use the recommended baselines
+- If test data strategy not clear, assume: unit = mocks, integration = fixtures, E2E = staging environment
+- Flag missing information in the test plan summary for the team to clarify
 
 ---
 
@@ -268,41 +228,23 @@ Include this in your test plan output:
 **Unit Tests (Dev Team - Strategy Format, No Gherkin):**
 
 ```
-TC-UNIT-001: Workout completion % calculation
-Test Strategy: Validate WorkoutCompletion.calculate_percentage() with input variations
-- Test inputs: 0/4, 1/4, 2/4, 3/4, 4/4 exercises skipped
+TC-UNIT-001: Workout completion percentage calculation
+Test Strategy: Validate WorkoutCompletion.calculate_percentage() with various completion counts
+- Test inputs: 0/4, 1/4, 2/4, 3/4, 4/4 exercises completed
 - Expected: completion_pct = (exercises_completed / total) × 100
-- Coverage: Business logic for partial/full completion tracking
+- Coverage: Percentage calculation logic for partial/full completion tracking
 - Owned by: Dev Team (automated unit test)
 Requirement Traceability: REQ-LOGGING-01-SC3
-Tags: @unit @data-calculation @logic @REQ-LOGGING-01-SC3
+Tags: @unit @calculation @REQ-LOGGING-01-SC3
 
-TC-UNIT-002: Exercise swap history data integrity
-Test Strategy: Verify ExerciseSwap model stores original and alternative IDs correctly
-- Test inputs: swap with valid exercise IDs, invalid IDs, null handling
-- Expected: ExerciseSwap.original_exercise_id and .alternative_exercise_id populated
-- Coverage: Data model integrity, foreign key constraints
-- Owned by: Dev Team (automated unit test)
-Requirement Traceability: REQ-SWITCHING-01-SC2
-Tags: @unit @data-integrity @model @REQ-SWITCHING-01-SC2
-
-TC-UNIT-003: Completion streak increment logic
-Test Strategy: Validate CompletionStreak increment/reset on consecutive vs gap days
-- Test inputs: last_workout_date variations (consecutive, gap, same day)
-- Expected: streak_days increment if consecutive, reset if gap
-- Coverage: Streak calculation logic, date comparison
+TC-UNIT-002: Completion streak reset on gap days
+Test Strategy: Validate streak increment/reset logic based on day gaps
+- Test inputs: last_workout_date as consecutive day, gap, same day
+- Expected: streak_days increments if consecutive, resets if gap
+- Coverage: Streak calculation and date comparison logic
 - Owned by: Dev Team (automated unit test)
 Requirement Traceability: REQ-LOGGING-01-SC1
-Tags: @unit @streak-logic @date-math @REQ-LOGGING-01-SC1
-
-TC-UNIT-004: 1RM estimation accuracy
-Test Strategy: Test Epley formula implementation: 1RM = weight × (1 + reps/30)
-- Test inputs: weight=[100, 225, 315], reps=[1-10]
-- Expected: 1RM within ±1 lb tolerance of formula result
-- Coverage: Math formula implementation, floating point precision
-- Owned by: Dev Team (automated unit test)
-Requirement Traceability: REQ-ANALYTICS-01-SC2
-Tags: @unit @formula @calculation @REQ-ANALYTICS-01-SC2
+Tags: @unit @streak-logic @REQ-LOGGING-01-SC1
 ```
 
 **Integration Tests (QA Team - Gherkin Format):**
@@ -324,10 +266,9 @@ Scenario: User logs workout offline and syncs when reconnected
   Given a user with no internet connection after their workout
   When they complete a workout log offline
   Then the app shows "Saved locally. Will sync when online."
-  And when the device reconnects
-  Then the log automatically syncs to the server
+  And when the device reconnects, the log automatically syncs to the server
 
-Test ID: TC-INTEGRATION-005
+Test ID: TC-INTEGRATION-002
 Requirement Traceability: REQ-LOGGING-01-SC4
 Owned by: QA Team
 Tags: @integration @offline-sync @connectivity @REQ-LOGGING-01-SC4
@@ -340,9 +281,7 @@ Scenario: Beginner completes full workout planning and first logging
   Given a beginner user opening the app for first time
   When they create a plan from "Full Body 3x/week" template
   And they customize one exercise
-  And they save the plan
-  And they complete their first workout
-  And they log it as "Completed as planned"
+  And they complete their first workout and log it as "Completed as planned"
   Then the plan is saved with 3 workouts for the week
   And the completed workout is logged
   And the streak counter shows 1
@@ -353,140 +292,66 @@ Owned by: QA Team (Manual + Automated)
 Tags: @e2e @beginner-flow @onboarding @REQ-PLANNING-01-SC1
 ```
 
-**Integration Test:**
+**Edge Case Tests:**
 ```gherkin
-Scenario: User loads template and saves workout without modifying original
-  Given a user viewing the "Full Body 3x/week" template
-  When they select "Use Template"
-  And they save the plan as a new workout
-  Then the new workout is created with template data
-  And the original template remains unchanged
-
-Test ID: TC-INTEGRATION-001
-Requirement Traceability: REQ-PLANNING-01-SC1 (Beginner Selects Pre-Built Template)
-Tags: @integration @workflow @REQ-PLANNING-01-SC1
-
-Scenario: Offline workout logging syncs when reconnected
-  Given a user with no internet connection
-  When they complete a workout log
-  Then the app shows "Saved locally. Will sync when online."
-  And the log is queued for sync
-  And when the device reconnects, the log syncs to the server
-
-Test ID: TC-INTEGRATION-002
-Requirement Traceability: REQ-LOGGING-01-SC4 (Offline Logging)
-Tags: @integration @offline-sync @REQ-LOGGING-01-SC4
-
-Scenario: Exercise swap updates LoggedExercise without affecting future workouts
-  Given a user swaps an exercise in today's workout
-  When the swap is completed
-  Then LoggedExercise record is updated with the alternative
-  And future scheduled workouts are not affected
-
-Test ID: TC-INTEGRATION-003
-Requirement Traceability: REQ-SWITCHING-01-SC2 (User Swaps and Continues Workout)
-Tags: @integration @data-consistency @REQ-SWITCHING-01-SC2
-```
-
-**E2E Test:**
-```gherkin
-Scenario: Beginner completes full workout planning flow in under 5 minutes
-  Given a beginner on the app for the first time
-  When they tap "Create Plan"
-  And they browse and select "Full Body 3x/week" template
-  And they customize one exercise
-  And they save the plan
-  Then the plan is saved with 3 workouts for the week
-  And the process completes in < 5 minutes
-
-Test ID: TC-E2E-001
-Requirement Traceability: REQ-PLANNING-01-SC1, REQ-PLANNING-01-SC2
-Tags: @e2e @workflow @beginner-flow @REQ-PLANNING-01-SC1 @REQ-PLANNING-01-SC2
-
-Scenario: User adapts workout when equipment is unavailable
-  Given a user is mid-workout and reaches "Barbell Back Squat"
-  When they mark the exercise as "equipment unavailable"
-  Then the app suggests 2-3 alternatives within 1 second
-  And when they select "Leg Press"
-  Then the workout logs the alternative instead
-  And a swap note is recorded
-
-Test ID: TC-E2E-002
-Requirement Traceability: REQ-SWITCHING-01-SC1, REQ-SWITCHING-01-SC2
-Tags: @e2e @adaptive-workout @REQ-SWITCHING-01-SC1 @REQ-SWITCHING-01-SC2
-
-Scenario: User views analytics and exports data
-  Given a user with 3 months of workout logs
-  When they open Analytics
-  And they select "Barbell Back Squat"
-  Then a progression chart displays
-  And when they tap "Export"
-  Then a CSV file is generated and ready to download
-
-Test ID: TC-E2E-003
-Requirement Traceability: REQ-ANALYTICS-01-SC1, REQ-ANALYTICS-01-SC4
-Tags: @e2e @analytics @export @REQ-ANALYTICS-01-SC1 @REQ-ANALYTICS-01-SC4
-```
-
-**Edge Case Test:**
-```gherkin
-Scenario: Late logging preserves streak for consecutive day
-  Given a user forgot to log a workout 2 days ago
-  When they tap "Log Past Workout"
-  And they select the date from 2 days ago
-  And they complete the log
-  Then the workout is recorded with the correct date
-  And the streak remains unbroken (consecutive days)
-
-Test ID: TC-EDGE-001
-Requirement Traceability: REQ-LOGGING-01-SC5 (Late Logging 2 Days After Workout)
-Tags: @edge-case @streak-logic @REQ-LOGGING-01-SC5
-
 Scenario: System prevents unrealistic weight entries
   Given a user with previous max weight of 225 lbs in an exercise
-  When they attempt to log 2250 lbs (10x max)
-  Then the system shows a warning
-  And the entry is not accepted
+  When they attempt to log 2250 lbs (10x previous max)
+  Then the system shows a validation warning
+  And the entry is rejected
 
-Test ID: TC-EDGE-002
-Requirement Traceability: REQ-LOGGING-01 (Data Accuracy - Open Question)
+Test ID: TC-EDGE-001
+Requirement Traceability: REQ-LOGGING-01
+Owned by: QA Team
 Tags: @edge-case @validation @data-quality
 
 Scenario: Partial workout completion calculates percentage correctly
   Given a workout with 4 exercises
-  When the user completes 3 exercises
-  And marks the workout as "partial completion"
-  Then the completion percentage is 75%
-  And the system prompts to reschedule the remaining 1 exercise
+  When the user completes 3 exercises and marks as "partial completion"
+  Then the completion percentage shows 75%
+  And the system offers to reschedule the remaining exercise
 
-Test ID: TC-EDGE-003
-Requirement Traceability: REQ-LOGGING-01-SC3 (Partial Completion)
+Test ID: TC-EDGE-002
+Requirement Traceability: REQ-LOGGING-01-SC3
+Owned by: QA Team
 Tags: @edge-case @calculation @REQ-LOGGING-01-SC3
+```
+
+**Performance Tests (DevOps/QA - Gherkin Format with Timing):**
+
+```gherkin
+Scenario: Workout plan creation completes within 2 seconds
+  Given a user with 50 previous workouts in the system
+  When they select "Create Plan" and browse templates
+  And they select "Full Body 3x/week" and save it
+  Then the plan is created and displayed within 2 seconds
+  And the response time remains <2s under 100 concurrent users
+
+Test ID: TC-PERF-001
+Requirement Traceability: REQ-PLANNING-01
+Owned by: DevOps/QA Team
+Tags: @performance @responsiveness @load-test @REQ-PLANNING-01
+
+Scenario: Batch workout logging syncs within 5 seconds
+  Given a user logging 10 workouts in offline mode
+  When the device reconnects to network
+  Then all logs sync to the server within 5 seconds
+  And no data is lost during sync
+
+Test ID: TC-PERF-002
+Requirement Traceability: REQ-LOGGING-01-SC4
+Owned by: DevOps/QA Team
+Tags: @performance @sync @offline-handling @REQ-LOGGING-01-SC4
 ```
 
 ---
 
-## Prompts
+## When to Use This Skill
 
-### ✓ Good Fit (Positive Examples)
+**Good inputs:** User stories with acceptance criteria, PRDs with feature specs, detailed requirements with scenarios.
 
-- File path to user stories document
-- File path to detailed PRD
-- Feature specification with acceptance criteria in Gherkin format
-- Multi-feature product specification
-- Habit tracker app with detailed user stories and data models
-- Feature with multiple user scenarios and edge cases
+**Poor inputs:** Vague feature descriptions, implementation code, existing test cases, "test this" without specs.
 
-### ✗ Poor Fit (Negative Examples)
+**This skill works when:** You have clear product specifications and need to convert them into organized, actionable test strategies and test cases by category (unit, integration, E2E, edge case, performance).
 
-- "Test this" with no specifications
-- Implementation code or design documents
-- Already-written test cases (no conversion needed)
-- Vague feature descriptions without acceptance criteria
-- Non-functional documents
-
-### Why This Skill Works Best
-
-Test-plan transforms **product specifications** into **detailed, actionable test cases**. It answers "what do we test?" and "how do we verify it works?" — converting acceptance criteria and user scenarios into executable test strategies organized by category (unit, integration, E2E, edge cases).
-
-Use this skill when you have clear specifications (PRD, user stories, acceptance criteria) and need comprehensive test coverage.
+**Best for:** Ensuring nothing is missed. Maps every acceptance criterion to test cases, identifies coverage gaps, and structures tests by team ownership (Dev, QA, DevOps).
