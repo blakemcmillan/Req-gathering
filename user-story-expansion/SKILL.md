@@ -1,35 +1,62 @@
 ---
 name: user-story-expansion
-description: Expand vague feature requests into structured requirements. Use whenever a user describes a feature idea that needs to be formalized into a User Story, Data State, Acceptance Criteria (Gherkin), and Probing Questions.
+description: Transform a PRD into detailed user stories with data states, acceptance criteria (Gherkin), and probing questions. Use after prd-creation to expand each feature into implementation-ready requirements.
 ---
 
-# Requirement Expansion
-Expand raw feature ideas into structured requirements.
+# User Story Expansion
 
-## Process
+Expand features from a PRD into structured user stories with acceptance criteria and probing questions.
 
-### 1. Alignment Check
-Is this a software feature request? If no, politely decline. If yes, proceed.
+## Initial Gate: Do You Have a PRD?
 
-### 2. Clarify if Needed
-Ask 1–3 questions if the request is vague:
-- Who uses this and why?
-- What's in scope?
-- What does done look like?
+**Do you already have a PRD file with designed features?**
 
-### 3. Expand
+### Path 1: Yes, from the prd-creation skill
 
-**User Story** (Agile format):
+**Where is the PRD file?** (e.g., `prd-habit-tracker.md`)
+
+Read the file from the specified location. Extract the product name. Proceed to Story Expansion.
+
+### Path 2: Yes, but from a different source
+
+**Where is the file?** (e.g., an existing PRD or design doc)
+
+Read the file from the specified location. Extract the product name if possible. Proceed to Story Expansion.
+
+### Path 3: No, I don't have a PRD yet
+
+No problem! Let's create one first.
+
+**Invoking prd-creation skill...**
+
+(Automatically invoke prd-creation skill. When it completes and produces `prd-<product_name>.md`, continue with Story Expansion using that file.)
+
+---
+
+## Story Expansion Process
+
+### 1. Read & Extract Features
+
+Read the PRD file. Extract:
+- Product name
+- All features listed in the PRD
+- For each feature: name, description, user roles, goals, functional/non-functional requirements
+
+### 2. Expand Each Feature
+
+For each feature from the PRD, generate:
+
+**User Story** (Agile format, derived from PRD user roles and feature description):
 ```
-As a [role], I want to [action], so that [value].
+As a [role from PRD], I want to [feature action], so that [goal/value from PRD].
 ```
 
-**Data State**:
-- Initial State: What exists now?
-- Final State: What exists after?
-- Core Data Models: What entities/fields are needed?
+**Data State** (what changes in the system):
+- Initial State: What exists before this feature?
+- Final State: What exists after this feature is implemented?
+- Core Data Models: Entities and fields needed (inferred from functional requirements)
 
-**Acceptance Criteria** (Gherkin, 3–5 scenarios):
+**Acceptance Criteria** (Gherkin, 3–5 scenarios covering happy path, edge cases, error cases):
 ```gherkin
 Scenario: [scenario title]
   Given [context]
@@ -37,144 +64,91 @@ Scenario: [scenario title]
   Then [outcome]
 ```
 
-**Probing Questions** (4–6 high-impact):
-- What happens if...?
-- How does this integrate with...?
-- What are performance/scale limits?
+**Probing Questions** (4–6 high-impact questions):
+- Integration points: How does this feature integrate with other features/systems?
+- Performance: What are performance expectations or scale limits?
+- Edge cases: What happens in unusual or error conditions?
+- Data: How is data validated, persisted, or synchronized?
+- User experience: Are there accessibility or UX edge cases?
+- Operations: Are there operational or monitoring concerns?
 
-### 4. Output: Markdown File
+### 3. Output: Markdown File
 
-Generate a `.md` file with this structure:
+Generate a single `.md` file for the entire product:
+
+```
+user-stories-<product_name>.md
+```
+
+Save to the root directory where this skill was invoked.
+
+---
+
+## Output Document Structure
 
 ```markdown
-# [Feature Name]
+# User Stories: <Product Name>
+
+## Feature: [Feature 1 Name]
 
 **User Story**
 As a [role], I want to [action], so that [value].
 
----
+### Data State
 
-## Data State
+**Initial State**
+[What exists before]
 
-### Initial State
-[Current system state]
+**Final State**
+[What exists after]
 
-### Final State
-[System state after feature]
+**Core Data Models**
+- Model1 (fields...)
+- Model2 (fields...)
 
-### Core Data Models
-- Model1 (id, fields...)
-- Model2 (id, fields...)
+### Acceptance Criteria
 
----
-
-## Acceptance Criteria
-
-### Scenario 1: [Happy Path]
+**Scenario 1: [Happy Path Title]**
 \`\`\`gherkin
 Given [context]
 When [action]
 Then [outcome]
 \`\`\`
 
-### Scenario 2: [Edge Case]
+**Scenario 2: [Edge Case Title]**
 \`\`\`gherkin
 Given [context]
 When [edge case]
 Then [outcome]
 \`\`\`
 
-### Scenario 3: [Error Case]
+**Scenario 3: [Error Case Title]**
 \`\`\`gherkin
 Given [context]
 When [error trigger]
 Then [error handling]
 \`\`\`
 
----
-
-## Open Questions & Gaps
+### Open Questions & Gaps
 
 1. [Category] — [Question]
 2. [Category] — [Question]
 3. [Category] — [Question]
 4. [Category] — [Question]
-5. [Category] — [Question]
 
 ---
 
-*Generated via Requirement Expansion Skill*
+## Feature: [Feature 2 Name]
+
+[Repeat structure for each feature in PRD]
+
+---
+
+*Generated via User Story Expansion Skill*
 ```
 
 ---
 
-## Example
+## Handoff Complete
 
-**Input:** "We want to let users export reports in Excel format."
-
-**Output:**
-
-```markdown
-# Excel Export Feature
-
-**User Story**
-As a business analyst, I want to export my reports in Excel format, so that I can share data with stakeholders who prefer spreadsheets over PDFs.
-
----
-
-## Data State
-
-### Initial State
-Reports can only be exported as PDF. No Excel export option exists.
-
-### Final State
-Reports can be exported as .xlsx with formatting (bold headers, colors, totals).
-
-### Core Data Models
-- ExportJob (id, report_id, format, created_at, status)
-- ExportLog (id, export_job_id, file_size, duration_ms, error_message)
-
----
-
-## Acceptance Criteria
-
-### Scenario 1: User Exports Report as Excel
-\`\`\`gherkin
-Given a user is viewing a report
-When they click "Export" and select "Excel (.xlsx)"
-And click "Download"
-Then a file is generated with the report name
-And column headers are bold and frozen
-And the file downloads within 30 seconds
-\`\`\`
-
-### Scenario 2: Empty Report Export
-\`\`\`gherkin
-Given a report has no data rows
-When they click "Export" and select "Excel"
-Then a modal warns: "No data. Export anyway?"
-And they can cancel or proceed
-\`\`\`
-
-### Scenario 3: Export Timeout
-\`\`\`gherkin
-Given an export job times out after 2 minutes
-When the user waits for completion
-Then they see: "Export failed. Please try again or contact support."
-And they can retry immediately
-\`\`\`
-
----
-
-## Open Questions & Gaps
-
-1. **Scope** — Should Excel exports include charts/visualizations or just tabular data?
-2. **Scale** — Are there row limits (e.g., max 100K rows per export)?
-3. **UX** — Should users be able to customize which columns to include?
-4. **Audit** — Do we need logs for who exported what and when?
-5. **Metadata** — Should exported files include the report's filters/parameters?
-
----
-
-*Generated via Requirement Expansion Skill*
-```
+The user stories are now ready for development, sprint planning, or technical architecture work. Each feature is fully specified with acceptance criteria, data state transitions, and open questions to resolve before implementation.

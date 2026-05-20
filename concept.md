@@ -1,0 +1,3 @@
+# Habit Tracker — Product Concept
+
+Build a mobile application that helps fitness enthusiasts of all levels build sustainable workout habits through flexible planning, simple progress tracking, and adaptive goal achievement. Users should be able to set weekly workout goals, plan workouts in advance with detailed exercise specifications, log actual workouts with minimal friction, and view their performance through multiple lenses (completion, detailed metrics, trends over time). The product should serve both beginners seeking accountability and motivation, and experienced athletes tracking detailed performance progression. Support adaptation—both mid-week plan changes and in-gym pivots when equipment is unavailable.

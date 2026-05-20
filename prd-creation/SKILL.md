@@ -62,20 +62,50 @@ For each major gain or pain cluster, design a feature that solves it. Show the m
 
 ### Step 4: Generate PRD
 
-Create a markdown PRD with:
-1. **Product Overview** — name, mission, description
-2. **Goals & Non-Goals** — what we're building, what we're not
-3. **User Roles & Needs** — each role, their tasks, gains, pains (grounded in discovered data)
-4. **Features & How They Solve Needs** — each feature with clear linkage to user gains/pains
-5. **Non-Functional Requirements** — derived from feature design and user needs
-6. **Success Metrics** — tied to user goals
-7. **Open Questions** — ambiguities or deferred decisions
+Create a markdown PRD with these sections:
+
+#### 1. Product Overview
+- Product name, mission, high-level description
+
+#### 2. Goals & Non-Goals
+- What we're building and what we're explicitly not building
+- Include 2–3 primary business goals for the product
+
+#### 3. User Roles & Needs
+- Table: User Role | Tasks | Gains | Pains (grounded in discovered data)
+
+#### 4. Features & How They Solve Needs
+
+For each feature, include:
+
+**Feature: [Name]**
+
+- **Goals** — 2–3 business goals this specific feature achieves
+- **Overview** — 2–3 sentence summary: what it does, why it matters
+- **Solves For** — which user roles, tasks, gains, and pains this feature addresses (many-to-one traceability)
+- **Functional Requirements** — what the feature does, user workflows it enables, integration points
+- **Non-Functional Requirements** — performance expectations, scalability, security, reliability
+- **Constraints**
+  - *Technical:* architecture limitations, technology choices, integration dependencies
+  - *Business:* timeline/availability, resource constraints, cost considerations
+- **Success Metrics** — how we measure success, KPIs tied to user goals
+- **Edge Cases & Considerations** — potential issues or failure modes, user scenarios to handle, data validation, error handling strategies
+
+#### 5. Non-Functional Requirements (Product-Wide)
+- Cross-cutting concerns not tied to individual features
+
+#### 6. Success Metrics (Product-Wide)
+- High-level product success metrics and KPIs
+
+#### 7. Open Questions
+- Ambiguities or deferred decisions
 
 Key principles:
 - Every feature traces back to user needs (no generic features)
 - Skip persona fluff (ages, names, irrelevant details)
 - Use the many-to-one pattern: celebrate features that elegantly solve multiple problems
 - Ground everything in the data we collected
+- **Traceability goes in "Solves For" sections of each feature—do not add an appendix table**
 
 ---
 
