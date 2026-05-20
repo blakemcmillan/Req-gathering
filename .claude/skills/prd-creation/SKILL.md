@@ -72,7 +72,31 @@ Create a markdown PRD with these sections:
 - Include 2–3 primary business goals for the product
 
 #### 3. User Roles & Needs
-- Table: User Role | Tasks | Gains | Pains (grounded in discovered data)
+
+For each user role, document their tasks, gains, and pains in structured format (grounded in discovered data):
+
+```
+### [User Role 1]
+
+#### Task: [Task Description]
+**Gains:**
+- [gain 1]
+- [gain 2]
+
+**Pains:**
+- [pain 1]
+- [pain 2]
+
+#### Task: [Task Description]
+**Gains:**
+- [gain 1]
+
+**Pains:**
+- [pain 1]
+
+### [User Role 2]
+[Continue with all roles and tasks discovered]
+```
 
 #### 4. Features & How They Solve Needs
 
