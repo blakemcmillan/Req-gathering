@@ -1,67 +1,63 @@
-# Flashlight — User Stories & Acceptance Criteria
+# iPhone Flashlight — User Stories & Acceptance Criteria
+
+**Project Code:** FL (Flashlight)
 
 ---
 
-## 🆔 Toggle LED On and Off
+## 🆔 LED Toggle Control
 
-- **PRD Reference:** Feature: Single-Tap LED Toggle (Section 4)
+- **PRD Reference:** Section 4 — LED Toggle Button Feature; Section 3 — iPhone User Task: Turn the LED on and off on iPhone
 - **Story ID:** `US-FL-TOGGLE-01`
 
 **User Story:**
-- **As a** iPhone user
-- **I want to** tap the screen to turn the LED on and off
-- **So that** I have instant light when I need it and can stop it when I don't
+- **As a** iPhone User
+- **I want to** toggle the LED on and off with a single button press
+- **So that** I can quickly and easily control the flashlight without any additional steps or complexity
 
 #### Acceptance Criteria:
 
-- **`AC-FL-TOGGLE-01-01` LED toggles on when tapped from off state**
-  - **Given** the app is open, the LED is off, and the user has granted flashlight permissions
-  - **When** the user taps the screen
-  - **Then** the LED illuminates within 100ms
-  - **And** the state indicator updates to show "on"
+- **`AC-FL-TOGGLE-01-01` LED Turns On with Single Press**
+  - **Given** the app is open and the LED is currently off
+  - **When** the user presses the toggle button once
+  - **Then** the iPhone LED illuminates immediately
+  - **And** the app displays a visual indicator confirming the LED is on
 
-- **`AC-FL-TOGGLE-01-02` LED toggles off when tapped from on state**
+- **`AC-FL-TOGGLE-01-02` LED Turns Off with Single Press**
   - **Given** the app is open and the LED is currently on
-  - **When** the user taps the screen
-  - **Then** the LED turns off within 100ms
-  - **And** the state indicator updates to show "off"
+  - **When** the user presses the toggle button once
+  - **Then** the iPhone LED turns off immediately
+  - **And** the app displays a visual indicator confirming the LED is off
 
-- **`AC-FL-TOGGLE-01-03` LED turns off when app is backgrounded or closed**
-  - **Given** the LED is currently on
-  - **When** the user switches to another app or force-closes the Flashlight app
-  - **Then** the LED turns off immediately
-  - **And** the LED does not re-activate when the app is reopened
+- **`AC-FL-TOGGLE-01-03` Toggle Response Time**
+  - **Given** the user presses the toggle button
+  - **When** the system processes the button press
+  - **Then** the LED state changes within 100 milliseconds
+  - **And** the visual indicator updates synchronously with the LED state change
 
-- **`AC-FL-TOGGLE-01-04` Visual state indicator is clear and accessible**
+- **`AC-FL-TOGGLE-01-04` Repeated Toggle Cycles Correctly**
+  - **Given** the LED is in any state (on or off)
+  - **When** the user presses the toggle button multiple times in succession
+  - **Then** each press inverts the LED state deterministically
+  - **And** no state becomes undefined or locked after consecutive presses
+
+- **`AC-FL-TOGGLE-01-05` LED State Persists Across App Suspend/Resume**
+  - **Given** the LED is in a specific state (on or off)
+  - **When** the app is backgrounded and then resumed
+  - **Then** the LED state persists unchanged
+  - **And** the visual indicator matches the actual LED state
+
+- **`AC-FL-TOGGLE-01-06` Graceful Degradation on Hardware Unavailability**
+  - **Given** the device does not have an LED or LED is unavailable
+  - **When** the user attempts to press the toggle button
+  - **Then** the app displays a clear error message indicating the LED is unavailable
+  - **And** the button remains visible but non-functional
+
+- **`AC-FL-TOGGLE-01-07` No Additional UI or Settings Exist**
   - **Given** the app is open
-  - **When** the user views the screen
-  - **Then** a clear visual indicator (distinct on/off states) shows the current LED status
-  - **And** the indicator meets WCAG AA contrast standards (≥4.5:1)
-  - **And** the indicator is distinguishable by color-blind users (not color alone)
+  - **When** the user interacts with the interface
+  - **Then** only the LED toggle button and its state indicator are displayed
+  - **And** no settings, menus, brightness controls, or additional options are available
 
-- **`AC-FL-TOGGLE-01-05` App launches instantly without friction**
-  - **Given** the user taps the app icon from the home screen
-  - **When** the app initializes
-  - **Then** the toggle screen loads and is interactive within 500ms (cold start)
-  - **And** no splash screen, onboarding, or permission prompts appear on first launch
-  - **And** the entire screen is interactive for toggling
+---
 
-- **`AC-FL-TOGGLE-01-06` Permissions are requested and handled gracefully**
-  - **Given** the user has not yet granted flashlight permissions
-  - **When** they attempt to toggle the LED
-  - **Then** the system requests camera/flashlight permission with clear context
-  - **And** if denied, a message guides the user to Settings to enable permissions
-  - **And** the app works immediately after permissions are granted without restarting
-
-- **`AC-FL-TOGGLE-01-07` Device constraints are handled gracefully**
-  - **Given** the device lacks LED flash capability (e.g., iPad)
-  - **When** the user attempts to toggle the LED
-  - **Then** an error message indicates the feature is unavailable
-  - **And** no crash or undefined behavior occurs
-
-- **`AC-FL-TOGGLE-01-08` Battery and CPU efficiency meet native flashlight baseline**
-  - **Given** the LED is active in the Flashlight app
-  - **When** measured over 1 hour of use
-  - **Then** power consumption is ≤ native iPhone flashlight
-  - **And** with the app open but LED off, idle CPU usage is <1%
-  - **And** no background processes drain battery after the app is closed
+**User Stories Complete.** Ready for test planning.
