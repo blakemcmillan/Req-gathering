@@ -76,21 +76,24 @@ Concept → Requirements Discovery → PRD Creation → User Story Detail → Te
 
 ### 4. test-plan
 
-**Purpose:** Create comprehensive test strategy and categorized test cases.
+**Purpose:** Create pragmatic, context-appropriate test strategy and test cases.
 
 **When to use:** When user stories and PRD are finalized, and you need a test strategy.
 
 **Inputs:**
-- Path to user stories or PRD (e.g., `/output/habit-tracker/user-stories.md`)
+- Path to user stories or PRD (e.g., `/output/pomodoro/user-stories.md`)
 
 **Outputs:**
-- `/output/<product_name>/test-plan.md` — Test plan with:
-  - Unit tests (dev-owned, ≥80% coverage)
-  - Integration tests (QA-owned, ≥60% critical workflows)
-  - E2E tests (100% of acceptance criteria)
-  - Edge case tests
-  - Performance tests
-  - Requirement traceability (REQ-FEATURE-01 → test cases)
+- `/output/<product_name>/test-plan.md` — Pragmatic test plan with:
+  - **Selective categories:** Only include test types relevant to the feature (not all 5 for every feature)
+  - Unit tests (dev-owned, pre-commit, ≥80% coverage)
+  - Integration tests (QA-owned, post-merge, ≥60% critical workflows)
+  - E2E tests (100% of user journeys where applicable)
+  - Edge case tests (boundary conditions, error states)
+  - Performance tests (only if feature has explicit performance requirements)
+  - Concise traceability matrix (REQ-FEATURE-01 → test cases)
+
+**Philosophy:** Generates lean, context-appropriate plans instead of boilerplate. A simple button needs 1 unit test; a dashboard with 100k+ rows needs performance tests. No mandatory sections.
 
 ---
 
@@ -141,22 +144,57 @@ All skills generate markdown files in a consistent structure:
 
 Each product folder contains the complete product specification chain, making it easy to organize, version, and archive project deliverables.
 
-### End-to-End Example
+### End-to-End Examples
 
-See `output/habit-tracker/` for a complete walkthrough of the **Habit Tracker** (fitness app):
-
+**Habit Tracker (Fitness App)** — Complete workflow with all steps:
 - `output/habit-tracker/concept.md` — Initial product idea
 - `output/habit-tracker/requirements.md` — Discovered user needs (from requirements-gathering)
 - `output/habit-tracker/prd.md` — Generated PRD with 6 features (from prd-creation)
 - `output/habit-tracker/user-stories.md` — Detailed user stories with 12 stories & 36 acceptance criteria (from user-story-expansion)
 - `output/habit-tracker/test-plan.md` — Comprehensive test strategy with 38 test cases (from test-plan)
 
-To see how the workflow flows:
+**Pomodoro Timer (Focus App)** — Pragmatic test planning example:
+- `output/pomodoro/prd.md` — 7-feature PRD (Timer, Task, Break, Config, Dashboard, Integration, System)
+- `output/pomodoro/user-stories.md` — Detailed specification with 32 user stories, 140+ acceptance criteria
+- `output/pomodoro/test-plan.md` — **Pragmatic test plan:** 33 test cases (not 62), selective categories, concise format
+  - Demonstrates lean approach: performance tests only for dashboard load (<2s), no performance tests for simple features
+  - Shows how to scale test density: 1-5 tests per requirement based on complexity
+
+To see how the workflow flows (Habit Tracker):
 1. Start with `concept.md` (what we're building)
 2. Read `requirements.md` (what we learned from users)
 3. Study `prd.md` (how we turned discovery into features)
 4. Review `user-stories.md` (detailed acceptance criteria with Gherkin format)
-5. Examine `test-plan.md` (how we verify everything works with unit, integration, E2E, edge case, and performance tests)
+5. Examine `test-plan.md` (how we verify everything works)
+
+To see pragmatic test planning (Pomodoro):
+1. Check `test-plan.md` (35-row traceability matrix, 33 concise test cases)
+2. Note selective categories: TIMER has Unit+Integration+E2E; DASH has Integration+Performance only
+3. See how test cases fit on one screen (no verbose examples)
+4. Review honest gaps section (v2 features, platform-specific work deferred)
+
+---
+
+## Automation & Quality Checks
+
+### PRD Quality Evaluator
+
+The toolkit includes automatic PRD quality evaluation:
+
+**Files:**
+- `.claude/settings.json` — Configures PostToolUse hooks
+- `.claude/skills/prd-creation/eval-prd.py` — PRD quality validator
+
+**How it works:**
+1. When PRD-creation skill outputs a PRD to `/output/<product>/prd.md`
+2. Hook automatically triggers evaluation script
+3. Checks for:
+   - Required sections (Goals, Overview, Requirements, Constraints, Success Metrics, Edge Cases)
+   - Placeholder text (TBD, TODO, FIXME)
+   - Section completeness
+4. Displays inline results with quality score and improvement suggestions
+
+**No manual review needed** — Quality checks run automatically, giving immediate feedback on PRD completeness.
 
 ---
 
@@ -190,23 +228,30 @@ Start by understanding problems (gains/pains), not by designing solutions. Users
 ```
 .
 ├── README.md                           (this file)
-├── output/
-│   └── habit-tracker/
-│       ├── concept.md                  (initial product idea)
-│       ├── requirements.md             (discovered user needs)
-│       ├── prd.md                      (6-feature PRD)
-│       ├── user-stories.md             (12 user stories, 36 acceptance criteria)
-│       └── test-plan.md                (38 test cases, 5 categories, 100% coverage)
-└── .claude/
-    └── skills/
-        ├── requirements-gathering/
-        │   └── SKILL.md                (discovery workflow)
-        ├── prd-creation/
-        │   └── SKILL.md                (PRD generation workflow)
-        ├── user-story-expansion/
-        │   └── SKILL.md                (acceptance criteria workflow)
-        └── test-plan/
-            └── SKILL.md                (test strategy workflow)
+├── .claude/
+│   ├── settings.json                   (project settings & hooks for PRD evaluation)
+│   └── skills/
+│       ├── requirements-gathering/
+│       │   └── SKILL.md                (discovery workflow)
+│       ├── prd-creation/
+│       │   ├── SKILL.md                (PRD generation workflow)
+│       │   └── eval-prd.py             (PRD quality evaluator - auto-runs on PRD output)
+│       ├── user-story-expansion/
+│       │   └── SKILL.md                (acceptance criteria workflow)
+│       └── test-plan/
+│           └── SKILL.md                (pragmatic test strategy workflow)
+└── output/
+    ├── habit-tracker/
+    │   ├── concept.md                  (initial product idea)
+    │   ├── requirements.md             (discovered user needs)
+    │   ├── prd.md                      (6-feature PRD)
+    │   ├── user-stories.md             (12 user stories, 36 acceptance criteria)
+    │   └── test-plan.md                (38 test cases, 5 categories, 100% coverage)
+    └── pomodoro/
+        ├── prd.md                      (Pomodoro Timer PRD)
+        ├── user-stories.md             (32 user stories across 7 features)
+        ├── test-plan.md                (33 pragmatic test cases, 118 hours effort)
+        └── pomodoro-reqs-test-data.md  (test data fixtures & fast-test constants)
 ```
 
 ---
@@ -283,4 +328,19 @@ This toolkit is open source. Use, modify, and share freely.
 
 ---
 
-**Last Updated:** May 20, 2026
+---
+
+## Recent Improvements
+
+**May 21, 2026:**
+- **Pragmatic Test Planning:** Refactored test-plan skill to be context-aware, not prescriptive
+  - Selective test categories (include only what applies)
+  - Concise traceability matrices (5-10 rows, not exhaustive)
+  - Flexible test density (1-5 per requirement, not fixed ratios)
+  - Brief test case format (3-7 line Gherkin, fits on one screen)
+- **PRD Evaluation Automation:** Added auto-running quality checks on PRD output
+- **Pomodoro Example:** Comprehensive specification for focus/timer app (32 stories, pragmatic test plan)
+
+---
+
+**Last Updated:** May 21, 2026
