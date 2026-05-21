@@ -1,278 +1,321 @@
 #!/usr/bin/env python3
-"""Requirements quality evaluator for AI Bootcamp."""
+"""Requirements quality evaluator - validates against SKILL.md structure requirements."""
 
 import sys
+import os
 import re
 from pathlib import Path
 
-def parse_requirements(content):
-    """Parse requirements.md and extract structure."""
-    # Extract user roles (### [User Role] headers)
+def evaluate_requirements(content):
+    """Evaluate requirements against SKILL.md structure requirements."""
+    results = []
+
+    # Check for required top-level sections
+    has_title = bool(re.search(r'^# ', content, re.MULTILINE))
+    result = {
+        "description": "Has main title (# Requirements or similar)",
+        "passed": has_title
+    }
+    if not has_title:
+        result["trace"] = "Document should start with a main title (# Requirements)."
+    results.append(result)
+
+    # Check for user roles section (### [User Role])
     user_roles = re.findall(r'^### (.+?)$', content, re.MULTILINE)
-    user_roles = list(dict.fromkeys(user_roles))  # Deduplicate while preserving order
+    user_roles = list(dict.fromkeys(user_roles))  # Deduplicate
+    has_user_roles = len(user_roles) >= 1
+    result = {
+        "description": f"User roles documented (at least 1, found {len(user_roles)})",
+        "passed": has_user_roles,
+        "details": f"{len(user_roles)} user role(s): {', '.join(user_roles[:3])}" if user_roles else "No user roles found"
+    }
+    if not has_user_roles:
+        result["trace"] = "Add ### [User Role] sections to document user personas and their needs. Example: ### Product Manager, ### Developer, ### End User"
+    results.append(result)
 
-    # Extract tasks (### Task: or ### Job: or #### Task: or #### Job: pattern)
+    # Check for tasks (### Task: or #### Task: pattern)
     tasks = re.findall(r'^#{3,4} (?:Task|Job): (.+?)$', content, re.MULTILINE)
-
-    # Count gains/pains sections (look for **Gains:** and **Pains:** headers)
-    gains_sections = len(re.findall(r'^\*\*Gains:\*\*', content, re.MULTILINE))
-    pains_sections = len(re.findall(r'^\*\*Pains:\*\*', content, re.MULTILINE))
-
-    return {
-        'user_roles': user_roles,
-        'user_role_count': len(user_roles),
-        'task_count': len(tasks),
-        'gains_sections': gains_sections,
-        'pains_sections': pains_sections,
-        'total_gains_and_pains': gains_sections + pains_sections
+    has_tasks = len(tasks) >= 1
+    result = {
+        "description": f"Tasks documented (at least 1, found {len(tasks)})",
+        "passed": has_tasks,
+        "details": f"{len(tasks)} task(s) identified"
     }
+    if not has_tasks:
+        result["trace"] = "Add ### Task: or #### Task: sections under each user role to describe what they want to do. Example: ### Task: Create workout plan, ### Task: Log completed exercises"
+    results.append(result)
 
-def parse_concept(content):
-    """Parse concept.md for complexity signals."""
-
-    # Scope: distinct capabilities/features mentioned
-    scope_keywords = [
-        r'\bfeature', r'\bcapabilit', r'\bsupport', r'\ballow',
-        r'\benable', r'\btrack', r'\bmanage', r'\bintegrat',
-        r'\banalyze', r'\bshare', r'\bfilter', r'\bcustomi'
-    ]
-    scope_mentions = sum(len(re.findall(kw, content, re.IGNORECASE)) for kw in scope_keywords)
-
-    # User Diversity: distinct user personas/types
-    user_mentions = len(re.findall(r'\b(user|player|developer|engineer|student|worker|customer|admin|casual|competitive|power user)\b', content, re.IGNORECASE))
-
-    # Task Interdependency: task linkage and interaction words
-    dependency_words = r'\b(integrat|sync|connect|link|workflow|across|multiple|interact|coordinate|alongside)\b'
-    interdependency_mentions = len(re.findall(dependency_words, content, re.IGNORECASE))
-
-    return {
-        'scope_score': scope_mentions,
-        'user_diversity_score': user_mentions,
-        'interdependency_score': interdependency_mentions
+    # Check for gains sections
+    gains = re.findall(r'^\*\*Gains:\*\*', content, re.MULTILINE)
+    has_gains = len(gains) >= 1
+    result = {
+        "description": f"Gains documented (at least 1, found {len(gains)})",
+        "passed": has_gains,
+        "details": f"{len(gains)} gain section(s) found"
     }
+    if not has_gains:
+        result["trace"] = "Add **Gains:** sections under each task to describe quantifiable benefits. Example: **Gains:** Save 2+ hours/week, increase workout consistency to 90%"
+    results.append(result)
 
-def infer_complexity(concept_signals):
-    """Infer complexity from concept signals."""
-    if not concept_signals:
-        return None, None
+    # Check for pains sections
+    pains = re.findall(r'^\*\*Pains:\*\*', content, re.MULTILINE)
+    has_pains = len(pains) >= 1
+    result = {
+        "description": f"Pains documented (at least 1, found {len(pains)})",
+        "passed": has_pains,
+        "details": f"{len(pains)} pain section(s) found"
+    }
+    if not has_pains:
+        result["trace"] = "Add **Pains:** sections under each task to describe current friction points. Example: **Pains:** Spreadsheets don't remind me, hard to track progress across weeks"
+    results.append(result)
 
-    scope = concept_signals['scope_score']
-    user_div = concept_signals['user_diversity_score']
-    interdep = concept_signals['interdependency_score']
+    # Check for balanced gains/pains (should be similar count)
+    gains_pains_match = abs(len(gains) - len(pains)) <= 1  # Allow 1 difference
+    result = {
+        "description": "Balanced Gains and Pains (counts should match or be within 1)",
+        "passed": gains_pains_match,
+        "details": f"Gains: {len(gains)}, Pains: {len(pains)}"
+    }
+    if not gains_pains_match:
+        result["trace"] = f"Current counts are unbalanced. For every task, ensure both **Gains:** AND **Pains:** are documented. Currently {len(gains)} gains vs {len(pains)} pains."
+    results.append(result)
 
-    # Simple: low scores across all three
-    if scope < 8 and user_div < 3 and interdep < 2:
-        return 'Simple', 'Single or minimal capabilities, single user type, no task interactions'
+    # Check for stakeholder diversity
+    stakeholder_keywords = r'\b(user|stakeholder|team|customer|admin|developer|product|manager|designer|engineer)\b'
+    stakeholder_mentions = len(re.findall(stakeholder_keywords, content, re.IGNORECASE))
+    has_stakeholder_diversity = stakeholder_mentions >= 5
+    result = {
+        "description": "Stakeholder diversity mentioned (5+ mentions of roles/personas)",
+        "passed": has_stakeholder_diversity,
+        "details": f"{stakeholder_mentions} stakeholder references found"
+    }
+    if not has_stakeholder_diversity:
+        result["trace"] = "Identify diverse stakeholders (end users, admins, developers, product team). Use role names consistently throughout the document."
+    results.append(result)
 
-    # Moderate: mid-range scores
-    elif scope < 15 and user_div < 6 and interdep < 4:
-        return 'Moderate', 'Multiple capabilities, 2-3 user types, some task interactions'
+    # Check for success metrics/KPIs
+    metric_keywords = r'\b(metric|kpi|target|goal|measure|reduce|increase|improve|percent|hour|time|cost|save)\b'
+    metric_mentions = len(re.findall(metric_keywords, content, re.IGNORECASE))
+    has_metrics = metric_mentions >= 5
+    result = {
+        "description": "Success metrics mentioned (5+ mentions, quantified where possible)",
+        "passed": has_metrics,
+        "details": f"{metric_mentions} metric-related words found"
+    }
+    if not has_metrics:
+        result["trace"] = "Add quantifiable success metrics. Examples: 'reduce manual entry time by 50%', 'achieve 95% workout consistency', '2+ hours saved per week'"
+    results.append(result)
 
-    # Complex: high scores
-    else:
-        return 'Complex', '5+ capabilities, multiple user types with competing needs, interdependent tasks'
+    # Check for constraints/boundaries
+    constraint_keywords = r'\b(constraint|boundary|limit|must|cannot|won\'t|exclude|scope|out of scope)\b'
+    constraint_mentions = len(re.findall(constraint_keywords, content, re.IGNORECASE))
+    has_constraints = constraint_mentions >= 3
+    result = {
+        "description": "Constraints and boundaries mentioned (3+)",
+        "passed": has_constraints,
+        "details": f"{constraint_mentions} constraint mentions found"
+    }
+    if not has_constraints:
+        result["trace"] = "Document constraints and boundaries. Examples: 'Mobile-only (no web)', 'Offline-first design', 'iOS 15+ only'"
+    results.append(result)
 
-def validate_structural_gates(requirements):
-    """Validate minimum structural requirements."""
-    checks = [
-        {
-            'name': 'At least 1 user role',
-            'passed': requirements['user_role_count'] >= 1
-        },
-        {
-            'name': 'At least 1 task',
-            'passed': requirements['task_count'] >= 1
-        },
-        {
-            'name': 'At least 1 gain AND 1 pain',
-            'passed': requirements['gains_sections'] >= 1 and requirements['pains_sections'] >= 1
-        }
+    # Check for assumptions documented
+    assumption_keywords = r'\b(assume|assuming|assume|presume|expect|expected|given|based on|prerequisite)\b'
+    assumption_mentions = len(re.findall(assumption_keywords, content, re.IGNORECASE))
+    has_assumptions = assumption_mentions >= 2
+    result = {
+        "description": "Assumptions documented (2+)",
+        "passed": has_assumptions,
+        "details": f"{assumption_mentions} assumption mentions found"
+    }
+    if not has_assumptions:
+        result["trace"] = "Document assumptions about users, technology, or market. Examples: 'Assume smartphone adoption is 80%+', 'Assume iOS 15+ support is acceptable'"
+    results.append(result)
+
+    # Check for use cases defined
+    usecase_keywords = r'\b(use case|scenario|workflow|process|step|when|as a|given|then)\b'
+    usecase_mentions = len(re.findall(usecase_keywords, content, re.IGNORECASE))
+    has_usecases = usecase_mentions >= 8
+    result = {
+        "description": "Use cases/scenarios described (8+ relevant keywords)",
+        "passed": has_usecases,
+        "details": f"{usecase_mentions} use case keyword mentions found"
+    }
+    if not has_usecases:
+        result["trace"] = "Define user workflows and scenarios. Use format: 'As a [role], I want to [action] so that [benefit].' or describe step-by-step workflows."
+    results.append(result)
+
+    # Check for accessibility/compliance mentioned
+    accessibility_keywords = r'\b(accessibility|wcag|inclusive|disabled|screen reader|keyboard|compliance|gdpr|privacy|secure)\b'
+    accessibility_mentions = len(re.findall(accessibility_keywords, content, re.IGNORECASE))
+    has_accessibility = accessibility_mentions >= 2
+    result = {
+        "description": "Accessibility, compliance, or security considerations mentioned (2+)",
+        "passed": has_accessibility,
+        "details": f"{accessibility_mentions} accessibility/compliance references found"
+    }
+    if not has_accessibility:
+        result["trace"] = "Consider and document: accessibility standards (WCAG AA), privacy regulations (GDPR), security requirements (encryption, auth)."
+    results.append(result)
+
+    # Check for placeholder content
+    placeholder_patterns = [
+        r'\bTBD\b', r'\bTODO\b', r'\bFIXME\b',
+        r'edit this', r'fill in', r'\[PLACEHOLDER\]'
     ]
-    return checks
+    found_placeholders = []
+    for pattern in placeholder_patterns:
+        matches = re.finditer(pattern, content, re.IGNORECASE)
+        for match in matches:
+            line_num = content[:match.start()].count('\n') + 1
+            found_placeholders.append({"pattern": pattern, "line": line_num})
 
-def assess_adequacy(complexity, requirements):
-    """Assess whether captured requirements match product complexity."""
+    has_no_placeholders = len(found_placeholders) == 0
+    result = {
+        "description": "No placeholder content (TBD, TODO, FIXME, [PLACEHOLDER])",
+        "passed": has_no_placeholders,
+        "failures": found_placeholders if found_placeholders else None
+    }
+    if not has_no_placeholders:
+        result["trace"] = f"Found {len(found_placeholders)} placeholder markers. Replace all with actual content before moving to PRD creation."
+    results.append(result)
 
-    roles = requirements['user_role_count']
-    tasks = requirements['task_count']
-    gains = requirements['gains_sections']
-    pains = requirements['pains_sections']
+    # Check for sufficient detail
+    content_quality = len(content) > 2000
+    result = {
+        "description": "Sufficient detail and completeness (≥2000 characters)",
+        "passed": content_quality,
+        "details": f"{len(content)} characters (target ≥2000)"
+    }
+    if not content_quality:
+        result["trace"] = f"Document is {len(content)} characters (target ≥2000). Add more detailed user roles, tasks, gains, and pains."
+    results.append(result)
 
-    if not complexity:
-        # No concept file; assess based on structure alone
-        if roles >= 1 and tasks >= 1 and gains >= 1 and pains >= 1:
-            return 'MEDIUM', 'Structural requirements met. Complexity cannot be assessed without concept file.'
-        else:
-            return 'LOW', 'Structural requirements not met.'
+    return results
 
-    # Simple product
-    if complexity == 'Simple':
-        if roles >= 1 and tasks >= 1 and gains >= 1 and pains >= 1:
-            return 'HIGH', 'Minimal requirements capture is appropriate for a simple, single-purpose product. No additional exploration needed.'
-        else:
-            return 'LOW', 'Structural requirements not met.'
+def generate_html(requirements_file, results):
+    """Generate HTML report."""
+    passed = sum(1 for r in results if r['passed'])
+    total = len(results)
+    score = int((passed / total * 100)) if total > 0 else 0
 
-    # Moderate product
-    elif complexity == 'Moderate':
-        if roles >= 2 and tasks >= 2 and gains >= 2 and pains >= 2:
-            return 'HIGH', 'Adequate user and task diversity matches moderate product scope.'
-        elif roles >= 1 and tasks >= 1 and gains >= 1 and pains >= 1:
-            return 'MEDIUM', 'Minimum structure met, but consider exploring additional user roles and task interactions.'
-        else:
-            return 'LOW', 'Insufficient exploration for moderate complexity.'
+    html = f'''<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Requirements Quality Evaluation - {Path(requirements_file).stem}</title>
+    <style>
+      body {{
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        padding: 20px;
+        background: #f5f5f5;
+      }}
+      h1 {{ color: #333; margin-top: 0; }}
+      .score {{ font-size: 18px; font-weight: bold; margin: 20px 0; color: #228B22; }}
+      table {{ border-collapse: collapse; width: 100%; background: white; margin-top: 20px; }}
+      th, td {{ border: 1px solid #ccc; padding: 12px; text-align: left; }}
+      th {{ background: #f0f0f0; font-weight: 600; }}
+      .pass {{ color: #228B22; font-weight: 600; }}
+      .fail {{ color: #ad0000; font-weight: 600; }}
+      .details {{ font-size: 12px; color: #666; margin-top: 4px; font-weight: normal; }}
+    </style>
+  </head>
+  <body>
+    <h1>Requirements Quality Evaluation</h1>
+    <div class="score">Score: {score}/100 ({passed}/{total} checks passed)</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Evaluation Criterion</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+'''
 
-    # Complex product
-    elif complexity == 'Complex':
-        if roles >= 3 and tasks >= 3 and gains >= 3 and pains >= 3:
-            return 'HIGH', 'Rich requirements depth matches complex, multi-user, interdependent product scope.'
-        elif roles >= 2 and tasks >= 2 and gains >= 2 and pains >= 2:
-            return 'MEDIUM', 'Good coverage, but consider deeper exploration of competing user needs and task interactions.'
-        else:
-            return 'LOW', 'Shallow requirements for complex product scope. Return to discovery.'
+    for result in results:
+        status = "PASS" if result['passed'] else "FAIL"
+        status_class = "pass" if result['passed'] else "fail"
+        html += f'''        <tr>
+          <td>
+            <div>{result['description']}</div>'''
 
-    return 'UNKNOWN', 'Unable to determine adequacy.'
+        # Add details if present
+        if 'details' in result and result['details']:
+            html += f'''<div class="details">{result['details']}</div>'''
 
-def generate_markdown(requirements, complexity, complexity_rationale, adequacy, adequacy_rationale, structural_checks, concept_present):
-    """Generate eval-requirements.md markdown output."""
+        # Add trace if present (for failures)
+        if not result['passed'] and 'trace' in result and result['trace']:
+            html += f'''<div style="color: #ad0000; font-size: 12px; margin-top: 6px; padding: 6px; background: #fff5f5; border-left: 3px solid #ad0000; border-radius: 2px;">
+            <strong>Why it failed:</strong> {result['trace']}
+            </div>'''
 
-    struct_status = 'PASS' if all(c['passed'] for c in structural_checks) else 'FAIL'
+        # Add detailed failure markers
+        if 'failures' in result and result['failures']:
+            html += '<div style="color: #ad0000; font-size: 12px; margin-top: 8px; padding: 8px; background: #fff5f5; border-radius: 4px;">'
+            for failure in result['failures']:
+                if isinstance(failure, dict) and 'line' in failure:
+                    html += f'''<div style="margin-bottom: 4px;">Line {failure['line']}: {failure['pattern']}</div>'''
+            html += '</div>'
 
-    md = f"""# Requirements Evaluation
+        html += f'''
+          </td>
+          <td class="{status_class}">[{status}]</td>
+        </tr>
+'''
 
-## Structural Validation
-
-"""
-    for check in structural_checks:
-        status = '✓' if check['passed'] else '✗'
-        md += f"- [{status}] {check['name']}\n"
-
-    md += f"\n**Status:** {struct_status}\n\n"
-
-    md += f"""## Requirements Summary
-
-- **User Roles:** {requirements['user_role_count']}
-- **Tasks:** {requirements['task_count']}
-- **Gains:** {requirements['gains_sections']} | **Pains:** {requirements['pains_sections']}
-
-"""
-
-    md += f"""## Complexity Assessment
-
-"""
-
-    if concept_present and complexity:
-        md += f"""**Concept Signals:**
-- Scope: Multiple capabilities and features identified
-- User Diversity: {requirements['user_role_count']} user role(s) discovered
-- Task Interdependency: {requirements['task_count']} task(s) with varying interactions
-
-**Complexity Level:** {complexity}
-- {complexity_rationale}
-
-"""
-    else:
-        md += f"""**Concept File:** Not found ⚠
-
-Complexity assessment skipped; analyzing requirements structure only.
-
-"""
-
-    md += f"""## Adequacy Rating
-
-**Confidence: {adequacy}**
-
-{adequacy_rationale}
-
-## Recommendations
-
-"""
-
-    if adequacy == 'HIGH':
-        md += "None. Requirements are adequate for PRD creation.\n"
-    elif adequacy == 'MEDIUM':
-        md += "- Ensure gains and pains are specific and concrete (not generic)\n"
-        if requirements['user_role_count'] < 2:
-            md += "- Consider exploring an additional user role or persona\n"
-        if requirements['task_count'] < 2:
-            md += "- Add tasks that show how different user types interact with the product\n"
-    else:  # LOW
-        if requirements['user_role_count'] < 2:
-            md += f"- Expand user discovery: aim for 2+ roles (found {requirements['user_role_count']})\n"
-        if requirements['task_count'] < 2:
-            md += f"- Add more tasks per user: aim for 2+ tasks (found {requirements['task_count']})\n"
-        if requirements['gains_sections'] < 1 or requirements['pains_sections'] < 1:
-            md += "- Ensure every task has at least one gain AND one pain\n"
-        md += "- Return to requirements gathering if uncertain\n"
-
-    md += f"""
-## Notes for Learning
-
-Complexity assessment compares the product's inherent scope, user diversity, and task interactions against your discovered requirements. Simple products (single capability, one user) need minimal requirements; complex products (many capabilities, competing user needs) demand rich exploration.
-
-"""
-
-    return md
+    html += '''      </tbody>
+    </table>
+  </body>
+</html>
+'''
+    return html
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: eval-requirements.py <requirements_file>", file=sys.stderr)
         sys.exit(1)
 
-    req_file = Path(sys.argv[1])
-    req_dir = req_file.parent
+    requirements_file = sys.argv[1]
+    if len(sys.argv) > 2:
+        output_file = sys.argv[2]
+    else:
+        output_file = requirements_file.replace('.md', '-eval.html')
 
-    if not req_file.exists():
-        print(f"Error: File not found: {req_file}", file=sys.stderr)
+    # Check if file exists
+    if not os.path.isfile(requirements_file):
+        print(f"Error: Requirements file not found: {requirements_file}", file=sys.stderr)
         sys.exit(1)
 
-    # Read requirements.md
+    # Read content
     try:
-        with open(req_file, 'r') as f:
-            req_content = f.read()
+        with open(requirements_file, 'r') as f:
+            content = f.read()
     except Exception as e:
-        print(f"Error reading file: {e}", file=sys.stderr)
+        print(f"Error reading requirements file: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # Check for concept.md in same directory
-    concept_file = req_dir / 'concept.md'
-    concept_present = False
-    complexity = None
-    complexity_rationale = None
+    # Evaluate
+    results = evaluate_requirements(content)
+    html = generate_html(requirements_file, results)
 
-    if concept_file.exists():
-        try:
-            with open(concept_file, 'r') as f:
-                concept_content = f.read()
-            concept_signals = parse_concept(concept_content)
-            complexity, complexity_rationale = infer_complexity(concept_signals)
-            concept_present = True
-        except Exception as e:
-            print(f"Warning: Could not read concept.md: {e}", file=sys.stderr)
-
-    # Parse requirements
-    requirements = parse_requirements(req_content)
-
-    # Validate structure
-    structural_checks = validate_structural_gates(requirements)
-
-    # Assess adequacy
-    adequacy, adequacy_rationale = assess_adequacy(complexity, requirements)
-
-    # Generate output
-    markdown_output = generate_markdown(
-        requirements, complexity, complexity_rationale,
-        adequacy, adequacy_rationale,
-        structural_checks, concept_present
-    )
-
-    # Write eval-requirements.md
-    output_file = req_dir / 'eval-requirements.md'
+    # Write output
     try:
         with open(output_file, 'w') as f:
-            f.write(markdown_output)
+            f.write(html)
 
-        print(f"✓ Evaluation written to {output_file}")
-        print(f"  Adequacy: {adequacy} | Complexity: {complexity or 'UNKNOWN'}")
+        passed = sum(1 for r in results if r['passed'])
+        total = len(results)
+        score = int((passed / total * 100)) if total > 0 else 0
+        print(f"✓ Requirements evaluation saved to {output_file}")
+        print(f"Score: {score}/100 ({passed}/{total} checks passed)")
+        
+        # Delete EVAL.txt if it exists
+        eval_file = "EVAL.txt"
+        if os.path.isfile(eval_file):
+            os.remove(eval_file)
+            print(f"✓ Cleaned up {eval_file}")
     except Exception as e:
         print(f"Error writing output: {e}", file=sys.stderr)
         sys.exit(1)
