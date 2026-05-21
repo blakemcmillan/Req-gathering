@@ -71,74 +71,70 @@ test-plan
 
 | Evaluator | Lines | Output Format | EVAL.txt Cleanup | Checks | Score | Status |
 |-----------|-------|---------------|------------------|--------|-------|--------|
-| eval-requirements.py | 281 | `.md` (Markdown) | ❌ NO | ~15 | Custom | 🔴 BROKEN |
+| eval-requirements.py | 245 | `.html` | ✅ YES | ~14 | 0-100 | ✅ FIXED |
 | eval-prd.py | 281 | `.html` | ✅ YES | ~12 | 0-100 | ✅ OK |
 | eval-test-plan.py | 307 | `.html` | ✅ YES | ~15 | 0-100 | ✅ OK |
 | eval-user-stories.py | 398 | `.html` | ✅ YES | ~19 | 0-100 | ✅ OK |
 
-### 🔴 Critical Issues Found
+### ✅ All Critical Issues RESOLVED (May 21, 2026)
 
-#### 1. **eval-requirements.py Output Format Mismatch** (CRITICAL)
-- **Problem:** Outputs `eval-requirements.md` (Markdown) instead of `requirements-eval.html`
-- **Impact:** Inconsistent with other three evaluators; breaks user experience
-- **Fix:** Convert to HTML output like prd, test-plan, user-stories
+**Previous Status:** 3/4 OK, 1/4 BROKEN  
+**Current Status:** ✅ 4/4 OK - ALL EVALUATORS ALIGNED
 
-#### 2. **eval-requirements.py Missing EVAL.txt Cleanup** (CRITICAL)
-- **Problem:** Does NOT delete EVAL.txt after running
-- **Impact:** EVAL.txt stays on disk, breaks automation workflow for next run
-- **Fix:** Add cleanup code: `if os.path.isfile("EVAL.txt"): os.remove("EVAL.txt")`
+#### Fix 1: Output Format ✅
+- ❌ Was: Outputs `eval-requirements.md` (Markdown)
+- ✅ Now: Outputs `requirements-eval.html` (HTML)
+- Impact: Consistent with prd-eval.html, test-plan-eval.html, user-stories-eval.html
 
-#### 3. **Different Function Signatures**
-- **requirements.py:** Uses `parse_requirements()` + custom logic
-- **Others:** Follow standard pattern: `evaluate_<type>()` + `generate_html()`
-- **Impact:** Harder to maintain; doesn't follow established pattern
+#### Fix 2: EVAL.txt Cleanup ✅
+- ❌ Was: Did NOT delete EVAL.txt after running
+- ✅ Now: Auto-deletes EVAL.txt (matches other evaluators)
+- Impact: Automation workflow no longer broken by leftover EVAL.txt
 
-#### 4. **Inconsistent Scoring Methods**
-- **requirements:** Custom adequacy/complexity scale (not 0-100)
-- **Others:** Standard 0-100 score (# passed / # total * 100)
-- **Impact:** Can't compare scores across evaluators
+#### Fix 3: Standard Architecture ✅
+- ❌ Was: Custom `parse_requirements()` + `generate_markdown()` pattern
+- ✅ Now: Standard `evaluate_requirements()` + `generate_html()` pattern
+- Impact: Consistent codebase; easier to maintain and extend
 
-#### 5. **Check Count Inconsistency**
-- **prd:** ~12 checks (fewest)
-- **requirements, test-plan:** ~15 checks each
-- **user-stories:** ~19 checks (most)
-- **Question:** Is PRD validation less important?
+### Standardization Complete
 
 ### ✅ What Works Well
 
 | Feature | All Four | Status |
 |---------|----------|--------|
-| Required sections checked | ✅ Yes | ✅ All validate core structure |
+| Output format (HTML) | ✅ Yes | ✅ All generate .html reports |
+| EVAL.txt cleanup | ✅ Yes | ✅ All auto-delete EVAL.txt |
+| Standard function signatures | ✅ Yes | ✅ All use evaluate_<type>() + generate_html() |
+| 0-100 scoring | ✅ Yes | ✅ All use consistent scoring |
 | Placeholder detection | ✅ Yes | ✅ All catch TBD/TODO/FIXME |
 | Traceability validation | ✅ Yes | ✅ All verify requirement links |
 | Gherkin format checking | ✅ Partial | ⚠️ test-plan & user-stories only |
-| HTML report styling | ✅ 3/4 | ⚠️ requirements uses Markdown |
 
-### Validation Approach Comparison
+### Validation Approach Comparison (Now Aligned)
 
-| Evaluator | Validation Method | Strengths | Weaknesses |
-|-----------|-------------------|-----------|-----------|
-| **requirements** | Complexity inference + custom logic | Contextual analysis | Non-standard; harder to debug |
-| **prd** | Regex patterns + string matching | Simple; maintainable | May miss edge cases |
-| **test-plan** | Regex + section counting | Pragmatic; clear | Limited semantic understanding |
-| **user-stories** | Strict regex + structure validation | Very thorough | Complex logic; 398 lines |
+| Evaluator | Validation Method | Check Count | Strengths |
+|-----------|-------------------|-------------|-----------|
+| **requirements** | Regex patterns + structure validation | ~14 | Clear requirements capture validation |
+| **prd** | Regex patterns + string matching | ~12 | Comprehensive feature validation |
+| **test-plan** | Regex + section counting | ~15 | Pragmatic test coverage validation |
+| **user-stories** | Strict regex + structure validation | ~19 | Thorough acceptance criteria validation |
+
+All four evaluators now follow the same pattern: **parse input → validate against checks → generate HTML → cleanup EVAL.txt**
 
 ### Recommendations
 
-**Priority 1 - MUST FIX:**
-1. Convert eval-requirements.py output from `.md` to `.html` format
-2. Add EVAL.txt cleanup to eval-requirements.py
-3. Refactor eval-requirements.py to use standard `evaluate_requirements()` + `generate_html()` pattern
+**Priority 1 - COMPLETED ✅:**
+1. ✅ Convert eval-requirements.py output from `.md` to `.html` format
+2. ✅ Add EVAL.txt cleanup to eval-requirements.py
+3. ✅ Refactor eval-requirements.py to use standard pattern
 
-**Priority 2 - SHOULD FIX:**
-1. Standardize scoring: Convert requirements.py to 0-100 scale
-2. Increase prd.py checks from 12 to ~15-17 for consistency
-3. Document why user-stories.py has most checks (19)
+**Priority 2 - OPTIONAL:**
+1. ⚠️ Increase prd.py checks from 12 to ~15-17 for feature parity (lower priority - prd still validates well)
+2. ⚠️ Document why user-stories.py has most checks (19) - appropriate for strictest deliverable
 
-**Priority 3 - NICE TO HAVE:**
-1. Consolidate validation logic into shared utility functions
-2. Create base evaluator class for DRY code
-3. Add evaluator integration tests
+**Priority 3 - FUTURE:**
+1. Consider shared utility functions to DRY up code
+2. Create base evaluator class pattern for future evaluators
 
 ---
 
