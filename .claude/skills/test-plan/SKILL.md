@@ -11,7 +11,7 @@ Transform the following user stories, acceptance criteria, or PRD into a compreh
 
 **Input:** $ARGUMENTS
 
-**Output Filename:** Create filename from feature/project name. Save to `/output/<project_name>/test-plan.md`
+**Output Filename:** Create filename from feature/project name. Save to `/output/<project_name>/test-plan.md`. Save file path to EVAL.txt
 
 ---
 

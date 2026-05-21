@@ -1,8 +1,81 @@
-# Habit Tracker Deliverable Review Summary
+# Project Updates Summary
 
-**Review Date:** 2026-05-20  
-**Reviewer:** Claude Code  
-**Status:** ✅ Complete with updates applied
+**Last Updated:** May 21, 2026  
+**Status:** ✅ Complete with evaluation automation and iPhone Flashlight example
+
+---
+
+## Recent Updates (May 21, 2026)
+
+### 1. Evaluation Hooks Enhancement
+
+**Added:**
+- EVAL.txt manual trigger support for on-demand evaluation
+- Both eval scripts now auto-delete EVAL.txt after completion
+- Simplified hook configuration (eval scripts handle output filename generation)
+
+**Files Modified:**
+- `.claude/settings.json` — Added EVAL.txt hook, simplified PRD/test-plan hooks
+- `.claude/skills/prd-creation/eval-prd.py` — Added EVAL.txt cleanup
+- `.claude/skills/test-plan/eval-test-plan.py` — Added EVAL.txt cleanup
+
+**How to Use:**
+```bash
+echo "/path/to/file.md" > EVAL.txt
+# Hook detects write, routes to appropriate evaluator, generates HTML report, cleans up
+```
+
+---
+
+### 2. iPhone Flashlight Example
+
+**Added:**
+- `output/iphone-flashlight/user-stories.md` — 1 feature (LED toggle), 8 acceptance criteria
+- `output/iphone-flashlight/test-plan.md` — 27 comprehensive test cases
+
+**Purpose:**
+- Demonstrates that minimal features still require comprehensive testing
+- Shows best practices for permission handling, device constraints, performance, battery efficiency
+- Real-world iOS mobile example (complements existing web/fitness examples)
+
+**Content:**
+- 6 Unit Tests (Dev Team): State machine, permissions, device detection
+- 6 Integration Tests (QA Team): Permission flows, lifecycle, state sync
+- 4 E2E Tests (QA Team): Cold/warm start, rapid toggle, accessibility
+- 5 Edge Case Tests (QA Team): Device constraints, permission cycles
+- 6 Performance Tests (DevOps/QA): Battery parity, latency, memory
+
+---
+
+## Project Status
+
+### ✅ Tooling Complete
+- All 4 skills functional and documented
+- Automatic evaluation hooks configured
+- Manual evaluation via EVAL.txt supported
+- Consistent output structure across all products
+
+### ✅ Examples Complete
+- **Habit Tracker:** Full workflow (concept → requirements → PRD → stories → tests)
+- **Pomodoro Timer:** Pragmatic test planning for focus app
+- **iPhone Flashlight:** Minimalist mobile app example
+
+### ✅ Documentation Complete
+- README.md comprehensive and up-to-date
+- REVIEW_SUMMARY.md verified all deliverables
+- SKILLS_REVIEW.md confirmed all skills ready
+- Project structure organized and clean
+
+---
+
+## Known Limitations
+
+None at present. All systems operational.
+
+---
+
+**Reviewed by:** Claude Code  
+**Date:** May 21, 2026
 
 ---
 

@@ -1,19 +1,12 @@
-# Flashlight — Test Plan
-
----
+# Test Plan: iPhone Flashlight App
 
 ## Test Plan Overview
 
-This test plan covers the Flashlight iOS app, a minimalist utility for turning the iPhone's LED flash on and off with a single tap. Testing focuses on core functionality (LED toggle, state display), permissions handling, performance (launch time, response latency, battery efficiency), and edge cases. The test strategy balances automated unit/integration tests for regression coverage with manual E2E and edge case testing to verify real-world user experience.
+The iPhone Flashlight app is a minimal, single-screen utility that allows users to toggle an LED flashlight with a tap. This test plan ensures the app delivers instant responsiveness, reliable LED control, proper permission handling, device compatibility, and power efficiency. Testing focuses on the core toggle functionality, edge cases around permissions and device constraints, and performance/power baselines.
 
-**Scope:** All features in the Single-Tap LED Toggle functionality (LED on/off, state display, app launch, permissions, battery efficiency).
+**Scope:** LED toggle functionality, permission handling, device compatibility, battery/CPU efficiency, and UI responsiveness.
 
-**Testing Approach:**
-- **Unit Tests:** Logic validation (state management, permissions checking)
-- **Integration Tests:** Feature workflows (LED toggle → state display, permission flows)
-- **E2E Tests:** Full user journeys (launch → toggle → state verification)
-- **Edge Case Tests:** Boundary conditions (backgrounding, device without LED, permission denial)
-- **Performance Tests:** Launch time, toggle latency, battery/CPU usage
+**Testing Approach:** Unit tests for state management and validation logic (Dev Team), integration tests for permission flows and LED control (QA Team), E2E tests for user journeys (QA Team), edge case testing for device constraints and error scenarios (QA Team), and performance/power testing for battery efficiency (DevOps/QA).
 
 ---
 
@@ -21,71 +14,70 @@ This test plan covers the Flashlight iOS app, a minimalist utility for turning t
 
 ### Ownership & Responsibilities
 
-**Dev Team:**
-- Unit tests: State logic, permission status, initialization
-- Component-level testing: LED toggle mechanics
-- Automated execution on every commit
-
-**QA Team:**
-- Integration tests: Feature workflows (LED on/off, permissions, state display)
-- E2E tests: Real user scenarios (launch → use → exit)
-- Edge case tests: Boundary conditions, error handling
-- Manual execution on PR merge, before release
-- Performance baseline testing
-
-**DevOps Team:**
-- CI/CD pipeline setup for automated test execution
-- Performance monitoring infrastructure (app launch timing, LED response time)
-- Test device provisioning (devices with/without LED)
-- Performance test environment and tools
+- **Dev Team:** Unit tests for state toggle logic, permission state validation, and error handling (automated, pre-commit)
+- **QA Team:** Integration/E2E tests for full user workflows, permission flows, device compatibility, and edge cases (automated + manual)
+- **DevOps/QA Team:** Performance and battery efficiency testing (automated under load)
 
 ### Environment Setup
 
-**Local Development:**
-- Xcode with iOS simulator (iOS 14+)
-- Unit test framework: XCTest
-- Mock/stub library: OCMock or custom protocols
-- Git hooks: Run unit tests pre-commit
+- **Local development environment:** Xcode with iOS simulator (multiple device models: iPhone 14, iPhone SE)
+- **Physical test devices:** iPhone 12 or later (with LED flash capability) and iPad (for device constraint testing)
+- **Test data:** Pre-configured permission states, mock device capabilities
+- **State reset:** Clear app permissions and data between test runs
 
-**Staging/Integration Testing:**
-- Physical test devices (iPhone 12, 14, 15 with LED)
-- Device without LED: iPad simulator or older iPhone model
-- Network conditions: Normal, offline (for background behavior)
+### CI/CD Integration
 
-**CI/CD Pipeline:**
-- Unit tests: Run on every commit (pre-merge gate)
-- Integration tests: Run on PR merge to main
-- E2E tests: Run nightly or on-demand before release
-- Performance tests: Run weekly and before releases
-- **Failed tests block merge to main**
+- **Unit tests:** Run on every commit (pre-merge gate), must achieve ≥80% coverage for LED toggle logic
+- **Integration/E2E tests:** Run on PR merge to main, nightly for comprehensive coverage
+- **Performance/Battery tests:** Run weekly and before releases to detect regressions
+- **Failed tests:** Block merges to main if any critical toggle or permission test fails
 
-**Tools & Dependencies:**
-- XCTest (native iOS testing framework)
-- XCUITest (E2E testing)
-- Instruments (performance profiling)
-- CocoaPods or SPM (dependency management)
-- GitHub Actions or Xcode Cloud (CI/CD)
+### Dependencies & Tools
+
+*Not specified in requirements; assume iOS standard libraries:*
+- **iOS Framework:** AVFoundation (torch mode for LED control)
+- **Permission System:** AVCaptureDevice, CoreMotion for device capability detection
+- **Testing Framework:** XCTest (Apple's standard)
+- **Performance Monitoring:** Xcode Profiler, Activity Monitor for battery/CPU metrics
 
 ### Coverage Goals
 
-- **Unit Tests:** ≥85% code coverage (LED state logic, permission checks)
-- **Integration Tests:** ≥70% of critical workflows
-- **E2E Tests:** 100% of acceptance criteria scenarios
-- **Edge Case Tests:** ≥90% of documented edge cases
-- **Overall Combined Coverage:** ≥80%
+- **Unit tests:** 85%+ coverage of toggle state machine and permission validation
+- **Integration tests:** 100% of permission grant/deny flows, all device types
+- **E2E tests:** 100% of user journeys (cold start, toggle, background/close)
+- **Edge cases:** 100% of device constraints, permission denial scenarios
+- **Performance tests:** Battery parity with native flashlight (measured on real devices)
+- **Overall:** 90%+ combined coverage
+
+### Test Data Strategy
+
+- **Unit tests:** Mock AVCaptureDevice, mock permission states (granted/denied/undetermined)
+- **Integration tests:** Real device permission flows, test fixtures for app state
+- **E2E tests:** Real or simulator environment with permissions pre-configured
+- **Edge cases:** Simulate device without LED (iPad), permission denial, permission revocation after startup
+- **Performance tests:** Real devices with 1-hour usage cycles, battery drain measurement
 
 ---
 
 ## Test Objectives
 
-1. Verify LED toggles on and off within 100ms response time
-2. Confirm app launches to interactive state in under 500ms (cold start)
-3. Validate state display (on/off) is clear and accessible
-4. Test permission handling: request, denial recovery, usage without permissions
-5. Verify LED turns off when app is backgrounded or closed
-6. Confirm battery efficiency: LED drain matches native flashlight, idle CPU < 1%
-7. Test edge cases: device without LED, rapid taps, late permission grants
-8. Ensure no crashes or undefined behavior in any scenario
+**Quality Standards:**
+- Instant responsiveness: LED illuminates within 100ms, app loads in <500ms
+- Reliability: No crashes on permission denial, device constraint, or background transition
+- Accessibility: WCAG AA contrast (≥4.5:1), color-blind friendly indicators
+- Efficiency: Power consumption ≤ native iPhone flashlight, idle CPU <1%
+
+**Critical User Workflows:**
+- Tap to toggle LED on, tap to toggle off
+- Cold start (home screen to interactive) in <500ms
+- Permission grant flow without interruption
+- App backgrounding without LED hang-over
+
+**Risk Areas to Prevent Regression:**
+- Permission state inconsistencies (app thinks LED is on, hardware is off)
+- Memory leaks during repeated toggle
+- Battery drain from background processes
+- Crash on unsupported devices
 
 ---
 
@@ -93,563 +85,528 @@ This test plan covers the Flashlight iOS app, a minimalist utility for turning t
 
 ### In Scope
 
-- LED toggle on/off functionality
-- Visual state indicators (on/off display)
-- App launch and initialization (no splash, no onboarding)
-- Permission requests and flows
-- LED off when app is backgrounded/closed
+- LED toggle on/off functionality (core feature)
+- State indicator UI (on/off visual feedback)
+- Permission request and grant flow
+- Permission denial and recovery
+- Device capability detection (LED availability)
+- Cold start performance (<500ms)
+- Warm start performance (reopen app)
+- Background/foreground transitions
 - Battery and CPU efficiency
-- Accessibility (WCAG AA contrast, VoiceOver support)
-- Error handling (device without LED, permissions denied)
+- WCAG AA accessibility (contrast, color-blind design)
 
 ### Out of Scope
 
-- Network-dependent features (not applicable to this app)
-- Push notifications or background activity (app has none)
-- Multi-language localization (UI is minimal, single button)
-- Analytics or telemetry
-- Third-party integrations
-- Siri shortcuts or Control Center integration (deferred per open questions)
+- iOS system-level permission settings UI (controlled by OS)
+- Third-party permission management tools
+- Network connectivity (app does not require network)
+- iCloud sync or user accounts (app is standalone)
+- Custom gestures beyond tap-to-toggle
+- Multi-device (iPad) feature parity (iPad lacks LED; feature unavailable by design)
 
 ---
 
-## Requirement Traceability
+## Requirement Traceability Matrix
 
-```
-| Requirement ID | Description | Test Case IDs | Coverage |
-|---|---|---|---|
-| REQ-FL-TOGGLE-01 | Toggle LED On | TC-UNIT-001, TC-INT-001, TC-E2E-001, TC-PERF-002 | ✓ Complete |
-| REQ-FL-TOGGLE-01-SC1 | LED activates on first tap | TC-INT-001, TC-E2E-001 | ✓ Covered |
-| REQ-FL-TOGGLE-01-SC2 | LED remains on in foreground | TC-UNIT-001, TC-INT-002 | ✓ Covered |
-| REQ-FL-TOGGLE-01-SC3 | Permissions requested | TC-INT-003, TC-E2E-003 | ✓ Covered |
-| REQ-FL-TOGGLE-01-SC4 | Graceful error without LED | TC-EDGE-002 | ✓ Covered |
-| REQ-FL-TOGGLE-02 | Toggle LED Off | TC-UNIT-001, TC-INT-004, TC-E2E-001 | ✓ Complete |
-| REQ-FL-TOGGLE-02-SC1 | LED deactivates on tap | TC-INT-004, TC-E2E-001 | ✓ Covered |
-| REQ-FL-TOGGLE-02-SC2 | LED off when backgrounded | TC-INT-002, TC-EDGE-001 | ✓ Covered |
-| REQ-FL-TOGGLE-02-SC3 | LED off when app closed | TC-EDGE-001 | ✓ Covered |
-| REQ-FL-TOGGLE-03 | Display LED State Clearly | TC-UNIT-002, TC-INT-005, TC-E2E-001 | ✓ Complete |
-| REQ-FL-TOGGLE-03-SC1 | Visual indicator off | TC-INT-005, TC-E2E-001 | ✓ Covered |
-| REQ-FL-TOGGLE-03-SC2 | Visual indicator on | TC-INT-005, TC-E2E-001 | ✓ Covered |
-| REQ-FL-TOGGLE-03-SC3 | Accessibility contrast | TC-UNIT-002 | ✓ Covered |
-| REQ-FL-TOGGLE-04 | Launch App Instantly | TC-UNIT-003, TC-E2E-002, TC-PERF-001 | ✓ Complete |
-| REQ-FL-TOGGLE-04-SC1 | Launch in <500ms | TC-PERF-001 | ✓ Covered |
-| REQ-FL-TOGGLE-04-SC2 | No prompts on first launch | TC-E2E-002 | ✓ Covered |
-| REQ-FL-TOGGLE-04-SC3 | Full screen interactive | TC-INT-006 | ✓ Covered |
-| REQ-FL-TOGGLE-05 | Battery Efficiency | TC-PERF-003, TC-PERF-004 | ✓ Complete |
-| REQ-FL-TOGGLE-05-SC1 | LED drain ≤ native | TC-PERF-003 | ✓ Covered |
-| REQ-FL-TOGGLE-05-SC2 | Idle CPU < 1% | TC-PERF-004 | ✓ Covered |
-| REQ-FL-TOGGLE-06 | Handle Permissions Gracefully | TC-INT-003, TC-EDGE-003, TC-E2E-003 | ✓ Complete |
-| REQ-FL-TOGGLE-06-SC1 | Permission explanation | TC-INT-003 | ✓ Covered |
-| REQ-FL-TOGGLE-06-SC2 | Guide to Settings | TC-EDGE-003 | ✓ Covered |
-| REQ-FL-TOGGLE-06-SC3 | Works after permission grant | TC-EDGE-003 | ✓ Covered |
-
-**Coverage Summary:** 23 of 23 requirements covered (100%)
-**Test Count by Category:** Unit: 3, Integration: 6, E2E: 3, Edge Case: 4, Performance: 4 | **Total: 20 test cases**
-```
+| REQ ID | Feature | Acceptance Criteria | Test Category | Owned by |
+|--------|---------|-------------------|----------------|----------|
+| REQ-TOGGLE-01 | Single-Tap LED Toggle | AC-FL-TOGGLE-01-01 to 01-08 | Unit, Integration, E2E, Edge, Performance | Dev/QA/DevOps |
+| REQ-TOGGLE-01-SC1 | LED On from Off State | AC-FL-TOGGLE-01-01 | Unit, Integration, E2E | Dev/QA |
+| REQ-TOGGLE-01-SC2 | LED Off from On State | AC-FL-TOGGLE-01-02 | Unit, Integration, E2E | Dev/QA |
+| REQ-TOGGLE-01-SC3 | App Background/Close | AC-FL-TOGGLE-01-03 | Integration, E2E | QA |
+| REQ-TOGGLE-01-SC4 | Visual State Indicator | AC-FL-TOGGLE-01-04 | E2E, Accessibility | QA |
+| REQ-TOGGLE-01-SC5 | Cold Start Performance | AC-FL-TOGGLE-01-05 | Performance, E2E | DevOps/QA |
+| REQ-TOGGLE-01-SC6 | Permission Handling | AC-FL-TOGGLE-01-06 | Integration, E2E, Edge | QA |
+| REQ-TOGGLE-01-SC7 | Device Constraints | AC-FL-TOGGLE-01-07 | Edge Case | QA |
+| REQ-TOGGLE-01-SC8 | Battery & CPU Efficiency | AC-FL-TOGGLE-01-08 | Performance | DevOps/QA |
 
 ---
 
 ## Test Cases
 
-### 1. Unit Tests (Dev Team — Owned)
+### 1. Unit Tests (Dev Team)
 
-**Automated, pre-commit execution. ≥85% code coverage.**
+**TC-UNIT-001: LED state toggles from off to on**
+- **Test Strategy:** Validate toggle state machine transition from off→on
+- **Test Inputs:** Current state = off, toggle action triggered
+- **Expected:** State changes to on, no exceptions thrown
+- **Coverage:** State machine transition logic for off→on
+- **Owned by:** Dev Team (automated unit test, pre-commit)
+- **Requirement Traceability:** REQ-TOGGLE-01-SC1
+- **Tags:** @unit @state-machine @toggle
 
----
+**TC-UNIT-002: LED state toggles from on to off**
+- **Test Strategy:** Validate toggle state machine transition from on→off
+- **Test Inputs:** Current state = on, toggle action triggered
+- **Expected:** State changes to off, no exceptions thrown
+- **Coverage:** State machine transition logic for on→off
+- **Owned by:** Dev Team (automated unit test, pre-commit)
+- **Requirement Traceability:** REQ-TOGGLE-01-SC2
+- **Tags:** @unit @state-machine @toggle
 
-#### TC-UNIT-001: LED Toggle State Management
+**TC-UNIT-003: Permission validation allows toggle only when granted**
+- **Test Strategy:** Verify toggle action is blocked if permission not granted
+- **Test Inputs:** Permission state = denied/undetermined, toggle action triggered
+- **Expected:** Toggle is rejected, permission request is triggered
+- **Coverage:** Permission check before toggle execution
+- **Owned by:** Dev Team (automated unit test, pre-commit)
+- **Requirement Traceability:** REQ-TOGGLE-01-SC6
+- **Tags:** @unit @permission @validation
 
-**Test Strategy:** Validate LED state transitions (on ↔ off) and persistence.
+**TC-UNIT-004: Device capability check detects LED availability**
+- **Test Strategy:** Validate device capability detection for LED flash
+- **Test Inputs:** AVCaptureDevice.default() with torch mode, device without LED (mocked)
+- **Expected:** Torch device found on iPhone, nil on iPad/unsupported device
+- **Coverage:** Device capability detection logic
+- **Owned by:** Dev Team (automated unit test, pre-commit)
+- **Requirement Traceability:** REQ-TOGGLE-01-SC7
+- **Tags:** @unit @device-check @capability
 
-- **Test Inputs:** 
-  - Toggle from off → on
-  - Toggle from on → off
-  - Multiple consecutive toggles
-  - State persistence across method calls
+**TC-UNIT-005: Error state when device lacks LED capability**
+- **Test Strategy:** Verify graceful error handling for devices without LED
+- **Test Inputs:** AVCaptureDevice.default(for: .video) returns nil (iPad simulation)
+- **Expected:** App sets error state, no crash, error message queued for UI
+- **Coverage:** Error handling for missing hardware
+- **Owned by:** Dev Team (automated unit test, pre-commit)
+- **Requirement Traceability:** REQ-TOGGLE-01-SC7
+- **Tags:** @unit @error-handling @device-constraint
 
-- **Expected Outcomes:**
-  - State transitions correctly: off → on, on → off
-  - `ledIsOn` boolean reflects actual LED state
-  - No state corruption after multiple toggles
-  - State remains consistent with system LED state
-
-- **Coverage:** LED state machine logic, toggle() method, property getters
-- **Owned by:** Dev Team (automated unit test)
-
-**Requirement Traceability:** REQ-FL-TOGGLE-01, REQ-FL-TOGGLE-02
-**Tags:** @unit @state-machine @core-logic
-
----
-
-#### TC-UNIT-002: LED State Indicator Display
-
-**Test Strategy:** Verify state indicator computation (on = green/bright, off = dim/gray).
-
-- **Test Inputs:**
-  - ledIsOn = true
-  - ledIsOn = false
-  - Accessibility color contrast calculation
-
-- **Expected Outcomes:**
-  - When ledIsOn = true: indicator shows "on" state (distinct color/text)
-  - When ledIsOn = false: indicator shows "off" state (distinct color/text)
-  - Contrast ratio ≥ 4.5:1 (WCAG AA)
-  - Color is not the only differentiator (icon or text also present)
-
-- **Coverage:** getStateIndicator() method, accessibility compliance, UI state binding
-- **Owned by:** Dev Team (automated unit test)
-
-**Requirement Traceability:** REQ-FL-TOGGLE-03-SC3
-**Tags:** @unit @ui-state @accessibility
-
----
-
-#### TC-UNIT-003: Permission Status Checking
-
-**Test Strategy:** Validate permission status determination and caching.
-
-- **Test Inputs:**
-  - AVCaptureDevice.authorizationStatus() returns .authorized
-  - AVCaptureDevice.authorizationStatus() returns .denied
-  - AVCaptureDevice.authorizationStatus() returns .notDetermined
-
-- **Expected Outcomes:**
-  - hasFlashlightPermission() returns true when .authorized
-  - hasFlashlightPermission() returns false when .denied or .notDetermined
-  - Permission status is checked at app startup
-  - Status is updated when requestPermission() is called
-
-- **Coverage:** Permission request/check logic, AVCaptureDevice integration
-- **Owned by:** Dev Team (automated unit test)
-
-**Requirement Traceability:** REQ-FL-TOGGLE-01-SC3, REQ-FL-TOGGLE-06
-**Tags:** @unit @permissions @authorization
+**TC-UNIT-006: Toggle action ignored if LED is currently transitioning**
+- **Test Strategy:** Verify rapid taps don't cause conflicting state changes
+- **Test Inputs:** User taps rapidly (within 50ms of previous toggle)
+- **Expected:** Second tap is queued or ignored, no concurrent state changes
+- **Coverage:** State mutation safety, concurrent tap handling
+- **Owned by:** Dev Team (automated unit test, pre-commit)
+- **Requirement Traceability:** REQ-TOGGLE-01-SC1, SC2
+- **Tags:** @unit @concurrency @state-safety
 
 ---
 
-#### TC-UNIT-004: App Launch Initialization
+### 2. Integration Tests (QA Team)
 
-**Test Strategy:** Verify app state is initialized correctly on launch.
-
-- **Test Inputs:**
-  - Cold app launch (no cached state)
-  - Warm launch (state cached from previous session)
-
-- **Expected Outcomes:**
-  - LED state defaults to off
-  - State indicator is displayed
-  - Permission check runs immediately
-  - No modals or dialogs block the UI
-  - All views are initialized in <100ms
-
-- **Coverage:** AppDelegate/SceneDelegate initialization, state setup, view hierarchy
-- **Owned by:** Dev Team (automated unit test)
-
-**Requirement Traceability:** REQ-FL-TOGGLE-04-SC2
-**Tags:** @unit @initialization @startup
-
----
-
-### 2. Integration Tests (QA Team — Owned)
-
-**Post-PR-merge execution. ≥70% critical workflow coverage.**
-
----
-
-#### TC-INT-001: LED Toggles On When Tapped from Off State
-
+**TC-INTEGRATION-001: Permission grant enables LED toggle**
 ```gherkin
-Scenario: User taps to turn LED on from off state
-  Given the app is open and the LED is currently off
-  And the user has granted flashlight permissions
-  When the user taps the screen
-  Then the LED illuminates within 100ms
-  And the state indicator updates to show "on"
-  And the LED remains on until the user taps again
+Scenario: User grants permission and toggles LED immediately
+  Given the app is open and flashlight permission is undetermined
+  When the user attempts to toggle the LED
+  Then the system shows the permission request dialog
+  And when the user taps "Allow"
+  Then the LED turns on within 100ms
+  And the permission is persisted for future toggles
 
-Test ID: TC-INT-001
-Requirement Traceability: REQ-FL-TOGGLE-01-SC1
-Owned by: QA Team
-Tags: @integration @core-workflow @REQ-FL-TOGGLE-01-SC1
+Test ID: TC-INTEGRATION-001
+Requirement Traceability: REQ-TOGGLE-01-SC6
+Owned by: QA Team (manual + automated)
+Tags: @integration @permission-flow @REQ-TOGGLE-01-SC6
 ```
 
----
-
-#### TC-INT-002: LED Remains On While App in Foreground
-
+**TC-INTEGRATION-002: Permission denial prevents toggle and shows guidance**
 ```gherkin
-Scenario: LED stays on without turning off automatically
-  Given the LED is currently on and the app is in foreground
-  When 30 seconds elapse
-  Then the LED remains on
-  And the state indicator continues to show "on"
-  And no automatic off behavior triggers
+Scenario: User denies permission and sees guidance
+  Given the app is open and flashlight permission is undetermined
+  When the user attempts to toggle the LED
+  Then the system shows the permission request dialog
+  And when the user taps "Don't Allow"
+  Then the LED does not turn on
+  And a message guides the user: "Enable flashlight in Settings > [App Name] > Camera"
 
-Test ID: TC-INT-002
-Requirement Traceability: REQ-FL-TOGGLE-01-SC2
-Owned by: QA Team
-Tags: @integration @state-persistence @REQ-FL-TOGGLE-01-SC2
+Test ID: TC-INTEGRATION-002
+Requirement Traceability: REQ-TOGGLE-01-SC6
+Owned by: QA Team (manual + automated)
+Tags: @integration @permission-denial @error-message @REQ-TOGGLE-01-SC6
 ```
 
----
-
-#### TC-INT-003: Permission Request Flow
-
+**TC-INTEGRATION-003: LED turns off when app is backgrounded**
 ```gherkin
-Scenario: System requests camera/flashlight permission on first toggle attempt
-  Given the app is open and permissions are not yet granted
-  When the user taps to toggle the LED
-  Then the system displays the permission request prompt
-  And the prompt explains that camera permission is needed for LED control
-  When the user taps "Allow"
-  Then the permission is granted
-  And the LED toggles on
-
-Test ID: TC-INT-003
-Requirement Traceability: REQ-FL-TOGGLE-01-SC3, REQ-FL-TOGGLE-06-SC1
-Owned by: QA Team
-Tags: @integration @permissions @user-flow @REQ-FL-TOGGLE-06-SC1
-```
-
----
-
-#### TC-INT-004: LED Toggles Off When Tapped from On State
-
-```gherkin
-Scenario: User taps to turn LED off from on state
-  Given the app is open and the LED is currently on
-  When the user taps the screen
+Scenario: LED stops immediately when app is backgrounded
+  Given the app is open and the LED is on
+  When the user switches to another app (home button or swipe up)
   Then the LED turns off within 100ms
-  And the state indicator updates to show "off"
-  And the LED remains off until the user taps again
+  And when the user returns to the Flashlight app
+  And the LED state indicator shows "off"
 
-Test ID: TC-INT-004
-Requirement Traceability: REQ-FL-TOGGLE-02-SC1
-Owned by: QA Team
-Tags: @integration @core-workflow @REQ-FL-TOGGLE-02-SC1
+Test ID: TC-INTEGRATION-003
+Requirement Traceability: REQ-TOGGLE-01-SC3
+Owned by: QA Team (manual + automated)
+Tags: @integration @lifecycle @background-transition @REQ-TOGGLE-01-SC3
+```
+
+**TC-INTEGRATION-004: LED turns off when app is force-closed**
+```gherkin
+Scenario: LED stops when user force-quits app
+  Given the app is open and the LED is on
+  When the user force-closes the app (swipe up and hold, then close)
+  Then the LED turns off immediately
+  And when the user reopens the app
+  And the LED state indicator shows "off"
+
+Test ID: TC-INTEGRATION-004
+Requirement Traceability: REQ-TOGGLE-01-SC3
+Owned by: QA Team (manual + automated)
+Tags: @integration @lifecycle @app-termination @REQ-TOGGLE-01-SC3
+```
+
+**TC-INTEGRATION-005: State indicator updates synchronously with LED**
+```gherkin
+Scenario: Visual indicator matches LED state in real-time
+  Given the app is open and the LED is off
+  When the user taps the screen to toggle on
+  Then the state indicator changes to "on" state (color, text, or symbol)
+  And when the user taps again to toggle off
+  Then the state indicator changes to "off" state
+
+Test ID: TC-INTEGRATION-005
+Requirement Traceability: REQ-TOGGLE-01-SC4
+Owned by: QA Team (automated visual verification)
+Tags: @integration @ui-state-sync @REQ-TOGGLE-01-SC4
+```
+
+**TC-INTEGRATION-006: Permission revocation is handled on app restart**
+```gherkin
+Scenario: User revokes permission in Settings, app detects on restart
+  Given the app has flashlight permission granted
+  And the user opens Settings and revokes flashlight (Camera) permission
+  When the user reopens the Flashlight app
+  Then the app detects the permission revocation
+  And when the user attempts to toggle the LED
+  Then the permission request dialog appears again
+  And a message guides the user to Settings
+
+Test ID: TC-INTEGRATION-006
+Requirement Traceability: REQ-TOGGLE-01-SC6
+Owned by: QA Team (manual + automated)
+Tags: @integration @permission-revocation @REQ-TOGGLE-01-SC6
 ```
 
 ---
 
-#### TC-INT-005: State Indicator Displays Current LED Status
+### 3. End-to-End Tests (QA Team)
 
+**TC-E2E-001: Full cold start to first toggle**
 ```gherkin
-Scenario: Visual indicator clearly shows whether LED is on or off
-  Given the app is open with the LED off
-  When the user views the screen
-  Then the state indicator clearly shows "off" state
-  And the button text prompts "Tap to turn on" or similar
-  When the user taps to turn LED on
-  Then the state indicator updates to "on" state
-  And the button text shows "Tap to turn off" or similar
-
-Test ID: TC-INT-005
-Requirement Traceability: REQ-FL-TOGGLE-03-SC1, REQ-FL-TOGGLE-03-SC2
-Owned by: QA Team
-Tags: @integration @ui-feedback @REQ-FL-TOGGLE-03
-```
-
----
-
-#### TC-INT-006: Full Screen Tap Area Toggles LED
-
-```gherkin
-Scenario: User can tap anywhere on screen to toggle LED
-  Given the app is open on the toggle screen
-  When the user taps in the center of the screen
-  Then the LED toggles
-  When the user taps near the top of the screen
-  Then the LED toggles
-  When the user taps near the bottom of the screen
-  Then the LED toggles
-  And the entire visible screen area is interactive
-
-Test ID: TC-INT-006
-Requirement Traceability: REQ-FL-TOGGLE-04-SC3
-Owned by: QA Team
-Tags: @integration @tap-target @usability @REQ-FL-TOGGLE-04-SC3
-```
-
----
-
-### 3. End-to-End Tests (QA Team — Owned)
-
-**Nightly or on-demand execution. 100% of acceptance criteria scenarios.**
-
----
-
-#### TC-E2E-001: User Toggles LED On and Off Multiple Times
-
-```gherkin
-Scenario: User opens app and toggles LED on and off multiple times
-  Given a user launches the Flashlight app for the first time
-  When they tap the screen to turn the LED on
-  Then the LED illuminates and the state indicator shows "on"
-  When they tap again
-  Then the LED turns off and the state indicator shows "off"
-  When they tap again
-  Then the LED turns on
-  And the app remains stable through all toggles
-  And no errors or crashes occur
+Scenario: User launches app for first time and toggles LED
+  Given the user taps the Flashlight app icon from the home screen
+  And the app is launching for the first time
+  When the app loads
+  Then the toggle screen is visible and interactive within 500ms
+  And no splash screen, onboarding, or unexpected permission prompts appear
+  And when the user taps the screen to toggle
+  Then the LED turns on within 100ms
+  And the state indicator shows "on"
 
 Test ID: TC-E2E-001
-Requirement Traceability: REQ-FL-TOGGLE-01, REQ-FL-TOGGLE-02, REQ-FL-TOGGLE-03
-Owned by: QA Team (Manual + Automated)
-Tags: @e2e @core-user-journey @REQ-FL-TOGGLE-01 @REQ-FL-TOGGLE-02 @REQ-FL-TOGGLE-03
+Requirement Traceability: REQ-TOGGLE-01-SC5, REQ-TOGGLE-01-SC1
+Owned by: QA Team (manual + automated)
+Tags: @e2e @cold-start @first-launch @REQ-TOGGLE-01-SC5
 ```
 
----
-
-#### TC-E2E-002: User Launches App and Uses Without Setup
-
+**TC-E2E-002: Rapid toggle on and off**
 ```gherkin
-Scenario: User opens app and can toggle LED without encountering prompts
-  Given a user launches the Flashlight app (after already granting permissions in a previous session)
-  When the app opens
-  Then no splash screen, onboarding, or permission dialog appears
-  And the toggle screen is displayed
-  And the LED can be toggled immediately with a single tap
-  And the entire interaction completes in under 1 second
+Scenario: User toggles LED on and off rapidly
+  Given the app is open and the LED is off
+  When the user taps to toggle on
+  And waits 200ms
+  And taps to toggle off
+  And waits 200ms
+  And taps to toggle on again
+  Then each toggle completes within 100ms
+  And the state indicator reflects the current LED state accurately each time
+  And no LED flicker or state inconsistency occurs
 
 Test ID: TC-E2E-002
-Requirement Traceability: REQ-FL-TOGGLE-04-SC1, REQ-FL-TOGGLE-04-SC2
-Owned by: QA Team (Manual)
-Tags: @e2e @user-experience @fast-launch @REQ-FL-TOGGLE-04
+Requirement Traceability: REQ-TOGGLE-01-SC1, REQ-TOGGLE-01-SC2
+Owned by: QA Team (automated)
+Tags: @e2e @rapid-toggle @state-consistency @REQ-TOGGLE-01-SC1
 ```
 
----
-
-#### TC-E2E-003: User Grants Permission and Toggles LED
-
+**TC-E2E-003: Warm start (reopen app with LED on)**
 ```gherkin
-Scenario: First-time user grants camera/flashlight permission and toggles LED
-  Given a user launching the Flashlight app for the first time
-  When they tap to toggle the LED
-  Then the permission request appears
-  And they tap "Allow" to grant camera/flashlight permission
-  Then the permission is granted
-  And the LED immediately toggles on
-  And the state indicator updates
-  And no errors occur
+Scenario: User closes and reopens app, LED state is preserved
+  Given the app is open and the LED is on
+  When the user switches away (background app)
+  And within 2 minutes, reopens the app
+  Then the LED remains off (per backgrounding requirement)
+  And the state indicator shows "off"
+  And the user can toggle on again without issues
 
 Test ID: TC-E2E-003
-Requirement Traceability: REQ-FL-TOGGLE-01-SC3, REQ-FL-TOGGLE-06
-Owned by: QA Team (Manual)
-Tags: @e2e @permissions @first-time-user @REQ-FL-TOGGLE-06
+Requirement Traceability: REQ-TOGGLE-01-SC3, REQ-TOGGLE-01-SC2
+Owned by: QA Team (manual + automated)
+Tags: @e2e @warm-start @state-recovery @REQ-TOGGLE-01-SC3
+```
+
+**TC-E2E-004: Accessibility - State indicator contrast and color-blindness**
+```gherkin
+Scenario: State indicator meets accessibility standards
+  Given the app is open
+  When the user views the state indicator in on and off states
+  Then the contrast ratio between indicator and background is ≥4.5:1 (WCAG AA)
+  And the indicator is distinguishable without relying on color alone
+  (e.g., includes text label, pattern, or shape change)
+  And screen readers announce "LED is on" and "LED is off" correctly
+
+Test ID: TC-E2E-004
+Requirement Traceability: REQ-TOGGLE-01-SC4
+Owned by: QA Team (manual accessibility review + automated contrast test)
+Tags: @e2e @accessibility @wcag-aa @color-blind @REQ-TOGGLE-01-SC4
 ```
 
 ---
 
-### 4. Edge Case & Error Handling Tests (QA Team — Owned)
+### 4. Edge Case & Error Handling Tests (QA Team)
 
-**Manual + targeted automated execution. ≥90% of edge cases.**
-
----
-
-#### TC-EDGE-001: LED Turns Off When App is Backgrounded or Closed
-
+**TC-EDGE-001: Device without LED flash (iPad)**
 ```gherkin
-Scenario: LED turns off automatically when app is backgrounded
-  Given the LED is currently on in the Flashlight app
-  When the user switches to another app (e.g., Safari)
-  Then the LED turns off immediately
-  And when the user returns to the Flashlight app
-  Then the state indicator shows "off"
-  And the LED does not re-activate
-
-Scenario: LED turns off when app is force-closed
-  Given the LED is currently on
-  When the user force-closes the app (swipe up in app switcher)
-  Then the LED turns off immediately
-  And no background process keeps the LED active
+Scenario: User opens Flashlight app on iPad (no LED)
+  Given the user opens the Flashlight app on an iPad
+  When the app initializes and detects no LED capability
+  Then an error message displays: "Flashlight not available on this device"
+  And the toggle button is disabled or hidden
+  And the app does not crash or hang
+  And the user can dismiss the message
 
 Test ID: TC-EDGE-001
-Requirement Traceability: REQ-FL-TOGGLE-02-SC2, REQ-FL-TOGGLE-02-SC3
-Owned by: QA Team (Manual)
-Tags: @edge-case @lifecycle @background-behavior @REQ-FL-TOGGLE-02
+Requirement Traceability: REQ-TOGGLE-01-SC7
+Owned by: QA Team (manual on iPad, automated simulator test)
+Tags: @edge-case @device-constraint @unsupported-hardware @REQ-TOGGLE-01-SC7
 ```
 
----
-
-#### TC-EDGE-002: Device Without LED Flash Shows Error Gracefully
-
+**TC-EDGE-002: Rapid permission grant/deny cycles**
 ```gherkin
-Scenario: iPad (no LED) displays error when user attempts toggle
-  Given a user opens the Flashlight app on an iPad (no LED flash)
-  When they attempt to tap the screen to toggle the LED
-  Then an error message appears: "LED flash not available on this device"
-  And the app does not crash
-  And no undefined behavior occurs
-  And the error message is dismissible
-
-Scenario: User with disabled LED attempts toggle
-  Given a user on an iPhone with a malfunctioning LED
-  When they attempt to toggle
-  Then the app gracefully handles the hardware error
-  And displays a clear message
-  And remains stable
+Scenario: User grants, denies, then re-grants permission rapidly
+  Given the app is open and permission is undetermined
+  When the user taps to toggle (permission request appears)
+  And taps "Allow" (permission granted)
+  Then the LED toggles on
+  And when the user reopens the app, goes to Settings, revokes permission, and returns
+  And taps to toggle again
+  Then the permission request appears
+  And when the user taps "Allow" again
+  Then the LED toggles on and the app works normally
 
 Test ID: TC-EDGE-002
-Requirement Traceability: REQ-FL-TOGGLE-01-SC4
-Owned by: QA Team (Manual on real devices)
-Tags: @edge-case @error-handling @hardware-limitation @REQ-FL-TOGGLE-01-SC4
+Requirement Traceability: REQ-TOGGLE-01-SC6
+Owned by: QA Team (manual)
+Tags: @edge-case @permission-cycles @state-recovery @REQ-TOGGLE-01-SC6
 ```
 
----
-
-#### TC-EDGE-003: Permission Denied Then Granted in Settings
-
+**TC-EDGE-003: LED state mismatch detection**
 ```gherkin
-Scenario: User denies permission, then grants in Settings, and returns to app
-  Given a user attempts to toggle with no permissions
-  When the permission request appears
-  And they tap "Don't Allow"
-  And they leave the app
-  And they go to Settings → Camera → and enable Flashlight access
-  And they return to the Flashlight app
-  Then the toggle works immediately without prompts
-  And no crash or error state occurs
+Scenario: Hardware and app state become out of sync (rare but testable)
+  Given the LED is on in the app
+  When a background system process interferes or LED hardware becomes unavailable
+  And the app attempts to toggle
+  Then the app detects the state mismatch
+  And the state indicator corrects to reflect reality
+  And the next toggle succeeds
 
 Test ID: TC-EDGE-003
-Requirement Traceability: REQ-FL-TOGGLE-06-SC2, REQ-FL-TOGGLE-06-SC3
-Owned by: QA Team (Manual)
-Tags: @edge-case @permissions @recovery @REQ-FL-TOGGLE-06
+Requirement Traceability: REQ-TOGGLE-01-SC1, REQ-TOGGLE-01-SC2
+Owned by: QA Team (simulated in integration test environment)
+Tags: @edge-case @state-mismatch @recovery @REQ-TOGGLE-01-SC1
 ```
 
----
-
-#### TC-EDGE-004: Rapid Taps Don't Cause Race Conditions
-
+**TC-EDGE-004: Screen timeout while LED is on**
 ```gherkin
-Scenario: User taps rapidly multiple times
-  Given the app is open
-  When the user taps the screen 5 times in rapid succession (within 1 second)
-  Then the LED state toggles correctly with each tap
-  And no state corruption occurs
-  And the UI remains responsive
-  And the final state matches the expected toggle sequence
+Scenario: Device screen locks while LED is on
+  Given the app is open and the LED is on
+  When the device screen times out and locks (after 30-60 seconds)
+  Then the LED remains on (app is backgrounded but still running)
+  And when the user unlocks the device and reopens the app
+  And the LED state shows "on"
+  And the user can toggle off successfully
 
 Test ID: TC-EDGE-004
-Requirement Traceability: REQ-FL-TOGGLE-01, REQ-FL-TOGGLE-02
-Owned by: QA Team (Automated)
-Tags: @edge-case @concurrency @stress-test
+Requirement Traceability: REQ-TOGGLE-01-SC3
+Owned by: QA Team (manual)
+Tags: @edge-case @screen-lock @state-persistence @REQ-TOGGLE-01-SC3
+```
+
+**TC-EDGE-005: Multiple rapid taps before first LED activation**
+```gherkin
+Scenario: User mashes the toggle button before LED first activates
+  Given the app is open, LED is off, and user taps rapidly 5+ times
+  When the taps are received faster than LED hardware can respond
+  Then the app queues or coalesces the taps
+  And after the first activation (100ms), the subsequent taps are processed in order
+  And the LED state is predictable and consistent
+  And no crash or undefined behavior occurs
+
+Test ID: TC-EDGE-005
+Requirement Traceability: REQ-TOGGLE-01-SC1, REQ-TOGGLE-01-SC2
+Owned by: QA Team (automated rapid-tap stress test)
+Tags: @edge-case @rapid-input @state-stability @REQ-TOGGLE-01-SC1
 ```
 
 ---
 
-### 5. Performance Tests (DevOps/QA — Owned)
+### 5. Performance & Load Tests (DevOps/QA)
 
-**Weekly or pre-release execution. Automated with performance monitoring.**
-
----
-
-#### TC-PERF-001: Cold Start App Launch Under 500ms
-
+**TC-PERF-001: Cold start time <500ms**
 ```gherkin
-Scenario: App launches from cold start to interactive in <500ms
-  Given the app is not in memory (force-quit)
-  When the user taps the app icon from home screen
-  Then the toggle screen appears and is interactive
-  And the time from tap to interactive screen is <500ms
-  And no splash screen delays the launch
-  And no initialization dialogs appear
-
-Acceptance: ✓ Launch completes in <500ms
+Scenario: App launches from home screen in <500ms
+  Given the user taps the Flashlight app icon from the home screen
+  When the app initializes (cold start, no background process)
+  Then the toggle screen is loaded and interactive within 500ms
+  And the user can tap to toggle within this time
+  And this latency is consistent across multiple cold starts
 
 Test ID: TC-PERF-001
-Requirement Traceability: REQ-FL-TOGGLE-04-SC1
-Owned by: DevOps/QA Team (automated performance monitoring)
-Tags: @performance @startup-latency @REQ-FL-TOGGLE-04-SC1
+Requirement Traceability: REQ-TOGGLE-01-SC5
+Owned by: DevOps/QA Team (automated performance profiling)
+Tags: @performance @cold-start @responsiveness @REQ-TOGGLE-01-SC5
 ```
 
----
-
-#### TC-PERF-002: LED Toggle Response Time <100ms
-
+**TC-PERF-002: LED toggle latency <100ms**
 ```gherkin
-Scenario: LED responds to tap within 100ms
-  Given the app is open and the LED is off
-  When the user taps the screen at T=0
-  Then the LED illuminates by T=100ms
-  And the state indicator updates visually within 100ms
-
-Acceptance: ✓ Toggle latency <100ms
+Scenario: LED illuminates within 100ms of tap
+  Given the app is open, LED is off, and permission is granted
+  When the user taps the screen to toggle on
+  Then the LED hardware activates within 100ms
+  (Measured from touch event to LED light output)
+  And this latency holds under repeated toggles over 1 hour of continuous use
 
 Test ID: TC-PERF-002
-Requirement Traceability: REQ-FL-TOGGLE-01-SC1, REQ-FL-TOGGLE-02-SC1
-Owned by: DevOps/QA Team (automated performance monitoring)
-Tags: @performance @response-latency @REQ-FL-TOGGLE-01 @REQ-FL-TOGGLE-02
+Requirement Traceability: REQ-TOGGLE-01-SC1
+Owned by: DevOps/QA Team (automated instrumented testing with LED sensor)
+Tags: @performance @responsiveness @latency @REQ-TOGGLE-01-SC1
 ```
 
----
-
-#### TC-PERF-003: Battery Drain Matches Native Flashlight
-
+**TC-PERF-003: Battery consumption ≤ native flashlight**
 ```gherkin
-Scenario: LED battery consumption is ≤ native iPhone flashlight
-  Given the Flashlight app with LED on
-  When the LED is active for 1 hour
-  Then battery drain is measured using Instruments (Energy Impact)
-  And the Flashlight app drain is ≤ native flashlight drain
-  And no background processes drain battery after app closes
-
-Acceptance: ✓ Energy drain equivalent or better than native
+Scenario: Flashlight app power draw matches native iOS flashlight
+  Given an iPhone with full battery (100%)
+  When the Flashlight app LED is on continuously for 1 hour
+  And the native iOS Control Center flashlight is on for 1 hour (separate test)
+  Then the Flashlight app power consumption ≤ native flashlight
+  And battery drain is measured in mAh and compared
 
 Test ID: TC-PERF-003
-Requirement Traceability: REQ-FL-TOGGLE-05-SC1
-Owned by: DevOps/QA Team (manual with Instruments profiling)
-Tags: @performance @battery @energy-efficiency @REQ-FL-TOGGLE-05-SC1
+Requirement Traceability: REQ-TOGGLE-01-SC8
+Owned by: DevOps/QA Team (manual battery drain test on real device)
+Tags: @performance @power-efficiency @battery-drain @REQ-TOGGLE-01-SC8
 ```
 
----
-
-#### TC-PERF-004: Idle CPU Usage <1%
-
+**TC-PERF-004: CPU usage idle <1%**
 ```gherkin
-Scenario: App uses minimal CPU when LED is off
-  Given the app is open in foreground with LED off
-  When the app is idle for 1 minute
-  Then CPU usage is <1% average
-  And no background timers or polling loops are active
-  And battery drain in idle state is negligible
-
-Acceptance: ✓ CPU idle <1%
+Scenario: App consumes minimal CPU when LED is off
+  Given the app is open and the LED is off
+  When the user leaves the app idle for 2 minutes (no toggles)
+  Then CPU usage is <1% average during the idle period
+  (Measured via Xcode Profiler or Activity Monitor on real device)
+  And no background threads are spinning or polling
 
 Test ID: TC-PERF-004
-Requirement Traceability: REQ-FL-TOGGLE-05-SC2
-Owned by: DevOps/QA Team (automated with Instruments)
-Tags: @performance @cpu-efficiency @idle-state @REQ-FL-TOGGLE-05-SC2
+Requirement Traceability: REQ-TOGGLE-01-SC8
+Owned by: DevOps/QA Team (automated CPU profiling)
+Tags: @performance @cpu-efficiency @idle-power @REQ-TOGGLE-01-SC8
+```
+
+**TC-PERF-005: No battery drain after app close**
+```gherkin
+Scenario: App does not drain battery after being closed
+  Given the Flashlight app was open with LED on
+  When the user closes the app
+  Then all background processes terminate
+  And CPU usage drops to 0%
+  And no LED hardware activity persists
+  And battery drain over 1 hour post-close is the baseline device idle drain (no app contribution)
+
+Test ID: TC-PERF-005
+Requirement Traceability: REQ-TOGGLE-01-SC8
+Owned by: DevOps/QA Team (manual battery baseline test)
+Tags: @performance @background-power @cleanup @REQ-TOGGLE-01-SC8
+```
+
+**TC-PERF-006: Memory stability over extended use**
+```gherkin
+Scenario: App memory footprint remains stable over 1000 toggles
+  Given the app is open
+  When the user toggles the LED on/off repeatedly for 1000 cycles over 30 minutes
+  Then memory usage remains ≤ 50MB at end of test
+  And no memory leaks are detected (heap grows <5MB from start)
+  And the app remains responsive (toggle latency stays <100ms)
+
+Test ID: TC-PERF-006
+Requirement Traceability: REQ-TOGGLE-01-SC1, REQ-TOGGLE-01-SC8
+Owned by: DevOps/QA Team (automated stress test with memory profiling)
+Tags: @performance @memory-stability @stress-test @REQ-TOGGLE-01-SC1
 ```
 
 ---
 
-## Summary
+## Test Execution Summary
 
-**Total Test Cases:** 20
-- **Unit Tests:** 4 (Dev Team)
-- **Integration Tests:** 6 (QA Team)
-- **E2E Tests:** 3 (QA Team)
-- **Edge Case Tests:** 4 (QA Team)
-- **Performance Tests:** 4 (DevOps/QA Team)
+### Test Case Count by Category
 
-**Coverage:**
-- Requirements Covered: 23/23 (100%)
-- Estimated Code Coverage: ≥80%
-- Critical Workflows: 100%
-- Edge Cases: ≥90%
+| Category | Count | Owned by | Execution Timing |
+|----------|-------|----------|------------------|
+| Unit Tests | 6 | Dev Team | Pre-commit (automated) |
+| Integration Tests | 6 | QA Team | Post-merge (automated + manual) |
+| E2E Tests | 4 | QA Team | Nightly (automated + manual) |
+| Edge Case Tests | 5 | QA Team | Pre-release (manual) |
+| Performance Tests | 6 | DevOps/QA | Weekly (automated) |
+| **Total** | **27** | **Dev/QA/DevOps** | **Continuous + Nightly + Weekly** |
 
-**Execution Timeline:**
-- Unit tests: Every commit (pre-merge gate)
-- Integration tests: PR merge to main
-- E2E tests: Nightly + on-demand before release
-- Performance tests: Weekly or before releases
-- Full test suite completion: ~45 minutes (CI automated) + 2-3 hours (manual QA)
+### Coverage by Requirement
+
+| Requirement | Test Cases | Coverage % |
+|-------------|-----------|-----------|
+| REQ-TOGGLE-01-SC1 (LED On) | TC-UNIT-001, TC-UNIT-002, TC-E2E-001, TC-E2E-002, TC-PERF-002, TC-PERF-006 | 100% |
+| REQ-TOGGLE-01-SC2 (LED Off) | TC-UNIT-002, TC-E2E-002, TC-E2E-003 | 100% |
+| REQ-TOGGLE-01-SC3 (Background/Close) | TC-INTEGRATION-003, TC-INTEGRATION-004, TC-E2E-003, TC-EDGE-004 | 100% |
+| REQ-TOGGLE-01-SC4 (Visual Indicator) | TC-INTEGRATION-005, TC-E2E-004 | 100% |
+| REQ-TOGGLE-01-SC5 (Cold Start) | TC-E2E-001, TC-PERF-001 | 100% |
+| REQ-TOGGLE-01-SC6 (Permissions) | TC-UNIT-003, TC-INTEGRATION-001, TC-INTEGRATION-002, TC-INTEGRATION-006, TC-EDGE-002 | 100% |
+| REQ-TOGGLE-01-SC7 (Device Constraints) | TC-UNIT-004, TC-UNIT-005, TC-EDGE-001 | 100% |
+| REQ-TOGGLE-01-SC8 (Battery & CPU) | TC-PERF-003, TC-PERF-004, TC-PERF-005, TC-PERF-006 | 100% |
+
+**Overall Coverage:** 100% of acceptance criteria mapped to test cases.
+
+### Ownership Breakdown
+
+- **Dev Team:** 6 unit tests (pre-commit, fully automated)
+- **QA Team:** 15 integration/E2E/edge case tests (post-merge + nightly + pre-release, manual + automated)
+- **DevOps/QA Team:** 6 performance tests (weekly + pre-release, automated profiling + manual)
+
+### Estimated Effort
+
+| Phase | Task | Effort | Timeline |
+|-------|------|--------|----------|
+| **Setup** | Xcode project, test framework, device setup (iPhone + iPad) | 4 hours | 1 day |
+| **Unit Tests** | 6 tests, mocking AVCaptureDevice & permission states | 8 hours | 1-2 days |
+| **Integration Tests** | 6 tests, permission flows, app lifecycle, state sync | 12 hours | 2-3 days |
+| **E2E Tests** | 4 tests, cold/warm start, accessibility, full workflows | 8 hours | 1-2 days |
+| **Edge Cases** | 5 tests, device constraints, permission cycles, state mismatch | 10 hours | 2-3 days |
+| **Performance Tests** | 6 tests, battery profiling, cold start timing, memory stability | 12 hours | 2-3 days |
+| **CI/CD Integration** | GitHub Actions or similar, automated test runs, reporting | 6 hours | 1 day |
+| **Total (all phases)** | | **60 hours** | **2-3 weeks** |
 
 ---
 
-## Open Questions for Testing
+## Key Testing Assumptions & Flags
 
-- Should app support Control Center or lock screen shortcuts for faster access? (defer to v2)
-- What device models should be included in performance baseline? (iPhone 12, 14, 15 minimum)
-- Should battery drain be tested in low-power mode? (yes, add to TC-PERF-003)
-- How frequently should performance benchmarks be re-baselined? (quarterly or after iOS updates)
+1. **iOS SDK Tools:** Assumes Xcode and XCTest are available; no additional test framework specified (using Apple standard).
+2. **Permission Testing:** Requires manual toggling of iOS Settings; simulator permission flows may differ from real device.
+3. **Battery Profiling:** Real device testing required; simulator cannot accurately measure power consumption.
+4. **Device Availability:** Assumes access to iPhone (with LED) and iPad (without LED) for device constraint testing.
+5. **WCAG Accessibility:** Manual review required for color-blind design validation; automated contrast ratio tools can supplement.
+6. **Baseline Comparison:** Battery parity test requires running native iOS flashlight in parallel on same device.
+
+---
+
+## Success Criteria
+
+All test categories must **pass** before release:
+
+- ✅ 100% of unit tests pass (0 failures)
+- ✅ 100% of integration/E2E tests pass (0 failures)
+- ✅ 100% of edge case tests pass (0 failures)
+- ✅ Cold start latency <500ms (measured on iPhone 12+)
+- ✅ LED toggle latency <100ms (measured 100+ times)
+- ✅ Battery consumption ≤ native flashlight (measured 1 hour continuous)
+- ✅ Idle CPU usage <1% (measured 2 minutes idle)
+- ✅ State indicator meets WCAG AA contrast (≥4.5:1)
+- ✅ No memory leaks detected over 1000 toggle cycles
+- ✅ App does not crash on unsupported device (iPad)

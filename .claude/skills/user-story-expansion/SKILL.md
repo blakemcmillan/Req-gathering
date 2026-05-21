@@ -1,8 +1,9 @@
+---
 name: user-story-expansion
 description: Transforms un-stacked PRD features into agent-optimized User Stories and traceable Gherkin Acceptance Criteria without scope creep or token waste.
 keywords: [user stories, acceptance criteria, gherkin, agent optimization, traceability]
 argument-hint: "[file path to PRD or requirements document]"
-allowed-tools: Read, Write
+allowed-tools: [Read, Write]
 ---
 
 # User Story & Acceptance Criteria Generator

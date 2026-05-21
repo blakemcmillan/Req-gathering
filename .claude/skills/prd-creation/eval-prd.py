@@ -12,22 +12,27 @@ def evaluate_prd(prd_content):
 
     # Check for required top-level sections per SKILL.md output structure
     sections = [
-        ("## Product Overview", "Has Product Overview section"),
-        ("## Goals", "Has Goals & Non-Goals section"),
-        ("## User Roles", "Has User Roles & Needs section"),
-        ("## Features", "Has Features & How They Solve Needs section"),
-        ("## Non-Functional Requirements", "Has Product-Wide Non-Functional Requirements"),
-        ("## Success Metrics", "Has Product-Wide Success Metrics"),
-        ("## Open Questions", "Has Open Questions section"),
+        (r"##\s+\d+\.\s+Product Overview|## Product Overview", "Has Product Overview section"),
+        (r"##\s+\d+\.\s+Goals|## Goals", "Has Goals & Non-Goals section"),
+        (r"##\s+\d+\.\s+User Roles|## User Roles", "Has User Roles & Needs section"),
+        (r"##\s+\d+\.\s+Features|## Features", "Has Features & How They Solve Needs section"),
+        (r"##\s+\d+\.\s+Non-Functional|## Non-Functional", "Has Product-Wide Non-Functional Requirements"),
+        (r"##\s+\d+\.\s+Success Metrics|## Success Metrics", "Has Product-Wide Success Metrics"),
+        (r"##\s+\d+\.\s+Open Questions|## Open Questions", "Has Open Questions section"),
     ]
 
     for pattern, description in sections:
-        passed = pattern in prd_content
-        results.append({
+        passed = bool(re.search(pattern, prd_content))
+        result = {
             "description": description,
             "pattern": pattern,
             "passed": passed
-        })
+        }
+        if not passed:
+            # Extract a more readable version of the section name
+            section_name = description.split("Has ")[1].split(" section")[0] if "Has " in description else "required section"
+            result["trace"] = f"Section '{section_name}' not found. Add this section to the PRD."
+        results.append(result)
 
     # Check for features with "Solves For" traceability (SKILL.md line 128)
     feature_matches = re.finditer(r'###\s+\*?\*?Feature:', prd_content, re.IGNORECASE)
@@ -49,15 +54,20 @@ def evaluate_prd(prd_content):
                 features_with_traceability += 1
 
         has_feature_traceability = features_with_traceability == len(features)
-        results.append({
+        result = {
             "description": f"All {len(features)} features have 'Solves For' traceability",
             "passed": has_feature_traceability,
             "details": f"{features_with_traceability}/{len(features)} features traced"
-        })
+        }
+        if not has_feature_traceability:
+            missing = len(features) - features_with_traceability
+            result["trace"] = f"Missing traceability on {missing} feature(s). Add '**Solves For:**' section to each feature explaining which user roles, tasks, gains, or pains it addresses."
+        results.append(result)
     else:
         results.append({
             "description": "Features documented with traceability",
-            "passed": False
+            "passed": False,
+            "trace": "No features found. Add features using '### Feature: [name]' headings to the Features section."
         })
 
     # Check for no placeholder text
@@ -78,18 +88,24 @@ def evaluate_prd(prd_content):
             })
 
     has_placeholders = len(found_placeholders) > 0
-    results.append({
+    result = {
         "description": "No placeholder content (TBD, TODO, FIXME)",
         "passed": not has_placeholders,
         "failures": found_placeholders if has_placeholders else None
-    })
+    }
+    if has_placeholders:
+        result["trace"] = f"Found {len(found_placeholders)} placeholder marker(s). Replace all TBD, TODO, FIXME with actual content."
+    results.append(result)
 
     # Check for sufficient detail/length
     content_quality = len(prd_content) > 4000
-    results.append({
+    result = {
         "description": "Sufficient detail and completeness",
         "passed": content_quality
-    })
+    }
+    if not content_quality:
+        result["trace"] = f"PRD is {len(prd_content)} characters (target ≥4000). Add more detail to features, acceptance criteria, and non-functional requirements."
+    results.append(result)
 
     # Check for quantified metrics specifically in Success Metrics section
     success_metrics = re.search(r'## Success Metrics.*?(?=##|\Z)', prd_content, re.DOTALL)
@@ -99,10 +115,16 @@ def evaluate_prd(prd_content):
     else:
         has_metrics = False
 
-    results.append({
+    result = {
         "description": "Success Metrics section contains quantified targets",
         "passed": has_metrics
-    })
+    }
+    if not has_metrics:
+        if not success_metrics:
+            result["trace"] = "Success Metrics section not found or empty. Add quantified targets like '90% success rate', '10 sessions/day', '5% error reduction'."
+        else:
+            result["trace"] = "Success Metrics section lacks quantification. Replace generic goals with specific targets: percentages, counts, time periods, or thresholds."
+    results.append(result)
 
     # Check that Goals section explicitly covers non-goals
     goals_section = re.search(r'## Goals.*?(?=##|\Z)', prd_content, re.DOTALL)
@@ -112,10 +134,16 @@ def evaluate_prd(prd_content):
     else:
         has_non_goals = False
 
-    results.append({
+    result = {
         "description": "Goals section explicitly covers Non-Goals",
         "passed": has_non_goals
-    })
+    }
+    if not has_non_goals:
+        if not goals_section:
+            result["trace"] = "Goals section not found. Add '## Goals' section with both what you WILL build and what you WON'T build."
+        else:
+            result["trace"] = "Goals section missing Non-Goals. Add subsection '### Non-Goals' or list 'Out of scope:' items to clarify boundaries."
+    results.append(result)
 
     return results
 
@@ -171,7 +199,13 @@ def generate_html(prd_file, results):
         if 'details' in result and result['details']:
             html += f'''<div class="details">{result['details']}</div>'''
 
-        # Add failure details if present
+        # Add trace if present (for failures)
+        if not result['passed'] and 'trace' in result and result['trace']:
+            html += f'''<div style="color: #ad0000; font-size: 12px; margin-top: 6px; padding: 6px; background: #fff5f5; border-left: 3px solid #ad0000; border-radius: 2px;">
+            <strong>Why it failed:</strong> {result['trace']}
+            </div>'''
+
+        # Add detailed failure markers (for placeholders)
         if 'failures' in result and result['failures']:
             html += '<div style="color: #ad0000; font-size: 12px; margin-top: 8px; padding: 8px; background: #fff5f5; border-radius: 4px;">'
             for failure in result['failures']:
@@ -227,12 +261,18 @@ def main():
     try:
         with open(output_file, 'w') as f:
             f.write(html)
-
+ 
         passed = sum(1 for r in results if r['passed'])
         total = len(results)
         score = int((passed / total * 100)) if total > 0 else 0
         print(f"✓ PRD evaluation saved to {output_file}")
         print(f"Score: {score}/100 ({passed}/{total} checks passed)")
+         
+        # Delete EVAL.txt if it exists
+        eval_file = "EVAL.txt"
+        if os.path.isfile(eval_file):
+            os.remove(eval_file)
+            print(f"✓ Cleaned up {eval_file}")
     except Exception as e:
         print(f"Error writing output: {e}", file=sys.stderr)
         sys.exit(1)

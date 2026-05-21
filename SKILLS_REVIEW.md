@@ -1,7 +1,84 @@
-# Skills Review & Updates Summary
+# Skills Status & Configuration
 
-**Review Date:** 2026-05-20  
-**Status:** ✅ All skills updated for consistency and accuracy
+**Last Updated:** May 21, 2026  
+**Status:** ✅ All skills operational with evaluation automation
+
+---
+
+## Skills Summary
+
+| Skill | Purpose | Input | Output | Status |
+|-------|---------|-------|--------|--------|
+| **requirements-gathering** | Interactive user discovery | Product concept | `/output/<name>/requirements.md` | ✅ Ready |
+| **prd-creation** | PRD generation from needs | Requirements file | `/output/<name>/prd.md` | ✅ Ready + Auto-Evaluate |
+| **user-story-expansion** | Acceptance criteria & workflows | PRD file | `/output/<name>/user-stories.md` | ✅ Ready |
+| **test-plan** | Test strategy & test cases | User stories | `/output/<name>/test-plan.md` | ✅ Ready + Auto-Evaluate |
+
+---
+
+## Evaluation Automation
+
+### PRD Quality Evaluator (`eval-prd.py`)
+- **Trigger:** Auto-runs on `/output/*/prd.md` write
+- **Manual Trigger:** `echo "/path/to/prd.md" > EVAL.txt`
+- **Checks:** Structure, traceability, placeholders, quantified metrics
+- **Output:** `/output/<name>/prd-eval.html`
+- **Cleanup:** Auto-deletes EVAL.txt after completion
+
+### Test Plan Quality Evaluator (`eval-test-plan.py`)
+- **Trigger:** Auto-runs on `/output/*/test-plan.md` write
+- **Manual Trigger:** `echo "/path/to/test-plan.md" > EVAL.txt`
+- **Checks:** Structure, test categories, traceability, pragmatic density, Gherkin format
+- **Output:** `/output/<name>/test-plan-eval.html`
+- **Cleanup:** Auto-deletes EVAL.txt after completion
+
+---
+
+## Workflow Chain
+
+```
+requirements-gathering
+    ↓ outputs to /output/<name>/requirements.md
+prd-creation
+    ↓ outputs to /output/<name>/prd.md (auto-evaluated)
+user-story-expansion
+    ↓ outputs to /output/<name>/user-stories.md
+test-plan
+    ↓ outputs to /output/<name>/test-plan.md (auto-evaluated)
+```
+
+All skills are production-ready for sequential or standalone use.
+
+---
+
+## Configuration
+
+### .claude/settings.json
+
+PostToolUse hooks configured for:
+1. **PRD evaluation** — Auto-runs eval-prd.py on prd.md writes
+2. **Test plan evaluation** — Auto-runs eval-test-plan.py on test-plan.md writes
+3. **Manual evaluation** — EVAL.txt trigger for on-demand evaluation of any markdown file
+
+**Hook Behavior:**
+- Reads file path from EVAL.txt
+- Routes to appropriate evaluator (based on filename)
+- Generates HTML report in same directory as source file
+- Auto-deletes EVAL.txt when done
+
+---
+
+## Examples
+
+- **Habit Tracker:** Complete workflow with all 4 skills (5 deliverables, 38 test cases)
+- **Pomodoro Timer:** Pragmatic test planning example (33 test cases, selective categories)
+- **iPhone Flashlight:** Minimalist iOS app (27 test cases across 5 categories)
+
+---
+
+**Status:** All systems operational. Ready for production use.
+
+**Last Updated:** May 21, 2026
 
 ---
 

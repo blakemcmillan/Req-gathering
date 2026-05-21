@@ -6,9 +6,9 @@
         "hooks": [
           {
             "type": "command",
-            "filter": "jq -r 'select(.tool_input.file_path | test(\"/output/.*prd\\.md$\")) | .tool_input.file_path'",
-            "command": "FILE=$(jq -r '.tool_input.file_path // empty') && [[ ! -z \"$FILE\" ]] && EVAL_FILE=\"${FILE%.md}-eval.html\" && echo && echo \"📊 PRD EVALUATION RESULTS:\" && echo \"════════════════════════════════\" && python3 .claude/skills/prd-creation/eval-prd.py \"$FILE\" \"$EVAL_FILE\" 2>&1 && echo \"════════════════════════════════\" && echo \"✓ Evaluation complete: $EVAL_FILE\" && echo",
-            "statusMessage": "Running PRD quality evaluation..."
+            "filter": "jq -r 'select(.tool_input.file_path | test(\"EVAL\\.txt$\")) | .tool_input.file_path' | head -1",
+            "command": "EVAL_FILE=$(jq -r '.tool_input.file_path' <<< \"$HOOK_INPUT\") && if [[ -f \"$EVAL_FILE\" ]]; then TARGET=$(cat \"$EVAL_FILE\" | head -1) && echo \"📝 Evaluating: $TARGET\" && if [[ \"$TARGET\" == *\"prd\"* ]]; then python3 .claude/skills/prd-creation/eval-prd.py \"$TARGET\" 2>&1; elif [[ \"$TARGET\" == *\"test\"* ]]; then python3 .claude/skills/test-plan/eval-test-plan.py \"$TARGET\" 2>&1; fi; fi",
+            "statusMessage": "Processing EVAL.txt trigger..."
           }
         ]
       }
