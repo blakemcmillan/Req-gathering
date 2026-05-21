@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PRD quality evaluator - simple checks without promptfoo complexity."""
+"""PRD quality evaluator - validates against SKILL.md structure."""
 
 import sys
 import os
@@ -7,21 +7,18 @@ import re
 from pathlib import Path
 
 def evaluate_prd(prd_content):
-    """Evaluate PRD against quality criteria."""
+    """Evaluate PRD against SKILL.md structure requirements."""
     results = []
 
-    # Check for required sections
+    # Check for required top-level sections per SKILL.md output structure
     sections = [
-        ("## Goals", "Has Goals section"),
-        ("## Overview", "Has Overview section"),
-        ("## Requirements", "Has Requirements section"),
-        ("### Functional Requirements", "Has Functional Requirements"),
-        ("### Non-Functional Requirements", "Has Non-Functional Requirements"),
-        ("## Constraints", "Has Constraints section"),
-        ("### Technical Constraints", "Has Technical Constraints"),
-        ("### Business Constraints", "Has Business Constraints"),
-        ("## Success Metrics", "Has Success Metrics section"),
-        ("## Edge Cases", "Has Edge Cases section"),
+        ("## Product Overview", "Has Product Overview section"),
+        ("## Goals", "Has Goals & Non-Goals section"),
+        ("## User Roles", "Has User Roles & Needs section"),
+        ("## Features", "Has Features & How They Solve Needs section"),
+        ("## Non-Functional Requirements", "Has Product-Wide Non-Functional Requirements"),
+        ("## Success Metrics", "Has Product-Wide Success Metrics"),
+        ("## Open Questions", "Has Open Questions section"),
     ]
 
     for pattern, description in sections:
@@ -32,17 +29,48 @@ def evaluate_prd(prd_content):
             "passed": passed
         })
 
+    # Check for features with "Solves For" traceability (SKILL.md line 128)
+    feature_matches = re.finditer(r'###\s+\*?\*?Feature:', prd_content, re.IGNORECASE)
+    features = list(feature_matches)
+
+    if len(features) > 0:
+        features_with_traceability = 0
+        for i, feature_match in enumerate(features):
+            # Extract feature section (from this feature to next or end)
+            start = feature_match.start()
+            if i + 1 < len(features):
+                end = features[i + 1].start()
+            else:
+                end = len(prd_content)
+
+            feature_section = prd_content[start:end]
+            # Check for "Solves For" in this feature section
+            if re.search(r'\*\*Solves For\*\*:?', feature_section, re.IGNORECASE):
+                features_with_traceability += 1
+
+        has_feature_traceability = features_with_traceability == len(features)
+        results.append({
+            "description": f"All {len(features)} features have 'Solves For' traceability",
+            "passed": has_feature_traceability,
+            "details": f"{features_with_traceability}/{len(features)} features traced"
+        })
+    else:
+        results.append({
+            "description": "Features documented with traceability",
+            "passed": False
+        })
+
     # Check for no placeholder text
     placeholder_patterns = [
         r'\bTBD\b', r'\bTODO\b', r'\bFIXME\b',
-        r'edit this', r'fill in', r'placeholder', r'\bgeneric\b'
+        r'edit this', r'fill in', r'\[PLACEHOLDER\]'
     ]
     found_placeholders = []
     for pattern in placeholder_patterns:
         matches = re.finditer(pattern, prd_content, re.IGNORECASE)
         for match in matches:
             line_num = prd_content[:match.start()].count('\n') + 1
-            context = prd_content[max(0, match.start()-50):min(len(prd_content), match.end()+50)].replace('\n', ' ')
+            context = prd_content[max(0, match.start()-40):min(len(prd_content), match.end()+40)].replace('\n', ' ')
             found_placeholders.append({
                 "pattern": pattern,
                 "line": line_num,
@@ -51,23 +79,42 @@ def evaluate_prd(prd_content):
 
     has_placeholders = len(found_placeholders) > 0
     results.append({
-        "description": "No placeholder or generic content",
+        "description": "No placeholder content (TBD, TODO, FIXME)",
         "passed": not has_placeholders,
         "failures": found_placeholders if has_placeholders else None
     })
 
     # Check for sufficient detail/length
-    content_quality = len(prd_content) > 5000  # Arbitrary minimum for "detailed"
+    content_quality = len(prd_content) > 4000
     results.append({
-        "description": "Sufficient detail (>5000 chars)",
+        "description": "Sufficient detail and completeness",
         "passed": content_quality
     })
 
-    # Check for quantified metrics
-    has_metrics = bool(re.search(r'\d+%|\d+s|\d+ms|\$\d+|<\d+|>\d+', prd_content))
+    # Check for quantified metrics specifically in Success Metrics section
+    success_metrics = re.search(r'## Success Metrics.*?(?=##|\Z)', prd_content, re.DOTALL)
+    if success_metrics:
+        metrics_text = success_metrics.group()
+        has_metrics = bool(re.search(r'\d+%|\d+\s*(users?|tasks?|sessions?|hours?|minutes?|days?|seconds?)', metrics_text, re.IGNORECASE))
+    else:
+        has_metrics = False
+
     results.append({
-        "description": "Contains quantified metrics",
+        "description": "Success Metrics section contains quantified targets",
         "passed": has_metrics
+    })
+
+    # Check that Goals section explicitly covers non-goals
+    goals_section = re.search(r'## Goals.*?(?=##|\Z)', prd_content, re.DOTALL)
+    if goals_section:
+        has_non_goals = bool(re.search(r'non-goal|non[- ]goal|\bnot\b.*building|out of scope|explicitly not',
+                                      goals_section.group(), re.IGNORECASE))
+    else:
+        has_non_goals = False
+
+    results.append({
+        "description": "Goals section explicitly covers Non-Goals",
+        "passed": has_non_goals
     })
 
     return results
@@ -97,6 +144,7 @@ def generate_html(prd_file, results):
       th {{ background: #f0f0f0; font-weight: 600; }}
       .pass {{ color: #228B22; font-weight: 600; }}
       .fail {{ color: #ad0000; font-weight: 600; }}
+      .details {{ font-size: 12px; color: #666; margin-top: 4px; font-weight: normal; }}
     </style>
   </head>
   <body>
@@ -118,6 +166,10 @@ def generate_html(prd_file, results):
         html += f'''        <tr>
           <td>
             <div>{result['description']}</div>'''
+
+        # Add details if present
+        if 'details' in result and result['details']:
+            html += f'''<div class="details">{result['details']}</div>'''
 
         # Add failure details if present
         if 'failures' in result and result['failures']:

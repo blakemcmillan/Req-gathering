@@ -179,22 +179,49 @@ To see pragmatic test planning (Pomodoro):
 
 ### PRD Quality Evaluator
 
-The toolkit includes automatic PRD quality evaluation:
+The toolkit includes automatic PRD quality evaluation triggered on every PRD output.
 
 **Files:**
-- `.claude/settings.json` — Configures PostToolUse hooks
-- `.claude/skills/prd-creation/eval-prd.py` — PRD quality validator
+- `.claude/settings.json` — Configures PostToolUse hooks to trigger evaluation
+- `.claude/skills/prd-creation/eval-prd.py` — PRD quality validator aligned with SKILL.md structure
 
 **How it works:**
-1. When PRD-creation skill outputs a PRD to `/output/<product>/prd.md`
-2. Hook automatically triggers evaluation script
-3. Checks for:
-   - Required sections (Goals, Overview, Requirements, Constraints, Success Metrics, Edge Cases)
-   - Placeholder text (TBD, TODO, FIXME)
-   - Section completeness
-4. Displays inline results with quality score and improvement suggestions
+1. When prd-creation skill outputs a PRD to `/output/<product>/prd.md`
+2. PostToolUse hook automatically triggers eval-prd.py
+3. Validator checks:
+   - **Structure:** All required sections per SKILL.md (Product Overview, Goals & Non-Goals, User Roles & Needs, Features, Product-Wide NFRs, Success Metrics, Open Questions)
+   - **Traceability:** Every feature has "Solves For" section linking to user roles/tasks/gains/pains
+   - **Completeness:** Non-Goals explicitly stated in Goals section; quantified success metrics present
+   - **Placeholders:** No TBD, TODO, FIXME content
+   - **Depth:** Sufficient detail (≥4000 chars) indicating thorough requirements
+4. Generates HTML evaluation report with pass/fail status and actionable feedback
 
-**No manual review needed** — Quality checks run automatically, giving immediate feedback on PRD completeness.
+**No manual review needed** — Evaluation runs automatically after PRD generation, with results displayed inline in console and saved as HTML.
+
+### Hook Configuration
+
+The automation is wired via Claude Code's PostToolUse hooks in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "filter": "jq -r 'select(.tool_input.file_path | test(\"/output/.*prd\\.md$\")) | .tool_input.file_path'",
+        "command": "python3 .claude/skills/prd-creation/eval-prd.py \"$FILE\" ..."
+      }
+    ]
+  }
+}
+```
+
+This configuration:
+- Intercepts Write operations on files matching `/output/*/prd.md`
+- Automatically runs eval-prd.py on each PRD file written
+- Displays evaluation results with status, failed checks, and context
+
+No additional setup needed—hooks are configured once and work on all PRDs.
 
 ---
 
@@ -229,13 +256,13 @@ Start by understanding problems (gains/pains), not by designing solutions. Users
 .
 ├── README.md                           (this file)
 ├── .claude/
-│   ├── settings.json                   (project settings & hooks for PRD evaluation)
+│   ├── settings.json                   (PostToolUse hooks for PRD evaluation automation)
 │   └── skills/
 │       ├── requirements-gathering/
 │       │   └── SKILL.md                (discovery workflow)
 │       ├── prd-creation/
 │       │   ├── SKILL.md                (PRD generation workflow)
-│       │   └── eval-prd.py             (PRD quality evaluator - auto-runs on PRD output)
+│       │   └── eval-prd.py             (SKILL.md-aligned quality validator, auto-triggered)
 │       ├── user-story-expansion/
 │       │   └── SKILL.md                (acceptance criteria workflow)
 │       └── test-plan/
@@ -338,7 +365,11 @@ This toolkit is open source. Use, modify, and share freely.
   - Concise traceability matrices (5-10 rows, not exhaustive)
   - Flexible test density (1-5 per requirement, not fixed ratios)
   - Brief test case format (3-7 line Gherkin, fits on one screen)
-- **PRD Evaluation Automation:** Added auto-running quality checks on PRD output
+- **PRD Quality Evaluator:** Added auto-running quality checks on PRD output
+  - Validates against SKILL.md structure (not generic sections)
+  - Checks feature traceability ("Solves For" sections present)
+  - Verifies explicit non-goals and quantified success metrics
+  - PostToolUse hook triggers automatically on PRD write
 - **Pomodoro Example:** Comprehensive specification for focus/timer app (32 stories, pragmatic test plan)
 
 ---
