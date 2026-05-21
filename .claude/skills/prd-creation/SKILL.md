@@ -77,7 +77,7 @@ Only populate PRD sections with content that is EITHER:
 - Explicitly stated or clearly referenced in the input requirements document, OR
 - Directly derived from discovered user gains/pains/tasks (e.g., success metrics derived from gains)
 
-If a section cannot be populated from source material, leave it empty or omit it. Do not invent, speculate, or assume constraints, technical dependencies, or business decisions not grounded in the discovered requirements.
+Do not create new sections beyond the 7 listed below. If a section cannot be populated from source material, leave it empty or omit it. Do not invent, speculate, or assume constraints, technical dependencies, or business decisions not grounded in the discovered requirements.
 
 ---
 
@@ -145,7 +145,6 @@ Key principles:
 - Skip persona fluff (ages, names, irrelevant details)
 - Use the many-to-one pattern: celebrate features that elegantly solve multiple problems
 - Ground everything in the data we collected
-- **Traceability goes in "Solves For" sections of each feature—do not add an appendix table**
 
 ---
 

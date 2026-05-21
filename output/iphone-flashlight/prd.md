@@ -1,29 +1,27 @@
-# Flashlight — Product Requirements Document
+# iPhone Flashlight — Product Requirements Document
 
 ## 1. Product Overview
 
-**Product Name:** Flashlight
+**Product Name:** iPhone Flashlight
 
-**Mission:** Provide instant, effortless access to your iPhone's LED light with a single tap.
+**Mission:** Provide the simplest possible way to turn the iPhone LED on and off.
 
-**Description:** A minimalist utility app that enables iPhone users to turn the device's LED flash on and off instantly. No complexity, no settings, no distractions—just a single button for light when you need it.
+**Description:** A single-button flashlight app that toggles the iPhone's LED with one press. No settings, no complexity—just on and off.
 
 ---
 
 ## 2. Goals & Non-Goals
 
 ### Goals
-- Enable users to turn the LED on and off with a single tap
-- Provide an interface so simple that no explanation is needed
-- Deliver instant light without delay or friction
+- Enable users to turn the iPhone LED on and off with a single press
+- Deliver an experience so simple that any user can operate it without instruction
+- Prioritize simplicity and ease of use as the core competitive advantage
 
 ### Non-Goals
-- Brightness adjustments or dimming modes
-- Color filters, strobing, or SOS signals
-- Settings, preferences, or configuration
-- History, favorites, or saved states
-- Sound effects or haptic feedback
-- Third-party integrations or sharing features
+- Add settings, brightness controls, or customization options
+- Support multiple lighting modes or effects
+- Integrate with device features beyond the LED
+- Provide any UI element or functionality beyond the on/off toggle
 
 ---
 
@@ -31,84 +29,72 @@
 
 ### iPhone User
 
-#### Task: Turn the LED on and off on my iPhone
+#### Task: Turn the LED on and off on iPhone
+
+**Success Criteria:**
+- The LED turns on and off with a single press
 
 **Gains:**
 - Very easy to use
 
 **Pains:**
-- Any additional complexity would be a pain. Only on and off with one button
+- Any additional complexity would be a pain
+- Users want only on and off with one button
 
 ---
 
 ## 4. Features & How They Solve Needs
 
-### Feature: Single-Tap LED Toggle
+### Feature: LED Toggle Button
 
 **Goals**
-- Enable instant light access with minimal friction
-- Ensure the app is immediately usable without learning curve
-- Eliminate any barrier between user intent and light
+- Enable users to control the LED with a single interaction
+- Deliver an interface so simple that complexity is eliminated as a source of friction
 
 **Overview**
-A single, full-screen button that toggles the iPhone's LED flash on and off. When the LED is off, the button prompts the user to tap to turn it on; when it's on, the button indicates the current state and allows a tap to turn it off. The entire screen serves as the interactive surface—no menus, no options, no secondary controls.
+A single button that toggles the iPhone LED on and off. One press turns it on; another press turns it off. No additional UI, settings, or options.
 
 **Solves For**
-- iPhone User → Task: Turn the LED on and off on my iPhone
-- Gain: Very easy to use
-- Pain: Any additional complexity would be a pain. Only on and off with one button
+- **User Role:** iPhone User
+- **Task:** Turn the LED on and off on iPhone
+- **Gains Addressed:** Very easy to use
+- **Pains Addressed:** Eliminates any complexity beyond a single on/off button
 
 **Functional Requirements**
-- Tapping the button toggles the LED state (on → off, off → on)
-- The button clearly indicates whether the LED is currently on or off
-- The app launches directly to the toggle screen with no splash screen, onboarding, or modal dialogs
-- Tapping anywhere on the screen toggles the LED (the entire screen is interactive, or a clearly visible button fills the screen)
-- The app remains responsive even if the device is locked
+- Pressing the button toggles the LED between on and off states
+- The app displays the current state of the LED (on or off)
+- The app respects the device's LED hardware capabilities
 
 **Non-Functional Requirements**
-- Response time: LED state change occurs within 100ms of tap
-- Battery: Light drain is equivalent to the native flashlight
-- Compatibility: Works on all iPhones with LED flash capability
-- Performance: App launches in under 500ms
-- Reliability: 99.9% uptime (LED toggle works when attempted)
-
-**Constraints**
-- *Technical:* Requires access to AVFoundation or equivalent framework to control LED; must request camera/flashlight permissions from the system
-- *Business:* No revenue model required; utility app with minimal ongoing maintenance needs
+- Toggle response time: immediate (< 100 ms)
+- Reliability: the LED must respond every time the button is pressed
+- The app must work on all iPhone models with an LED
 
 **Success Metrics**
-- Users can toggle the LED without viewing instructions
-- App is launched and LED is controlled in under 1 second from cold start
-- Zero support tickets related to feature clarity
-
-**Edge Cases & Considerations**
-- Device does not have an LED flash: Display a graceful error message indicating the feature is unavailable
-- Permissions denied: Guide user to Settings to enable camera/flashlight access
-- LED already in use: Respect system constraints; app requests but does not force control
-- Low battery mode: Function normally; do not alter LED behavior based on device power state
-- Device locked: Ensure LED can still be toggled without unlocking (if system allows)
+- Users can turn the LED on and off with a single press 100% of the time
+- No user training or documentation required for basic operation
 
 ---
 
-## 5. Non-Functional Requirements
+## 5. Non-Functional Requirements (Product-Wide)
 
-- **Accessibility:** Button and text must meet WCAG AA contrast standards; support VoiceOver
-- **Localization:** UI text minimal; single button and status indicator require no translation
-- **Security:** No personal data collection; no external API calls; offline-only operation
-- **Offline:** Fully functional with no internet connection required
+- **Simplicity:** The app's entire interface and behavior must remain simple; no hidden menus, settings, or advanced options
+- **Reliability:** The LED control must never fail or lag
+- **Accessibility:** The button and feedback must be clear and usable by all users
 
 ---
 
-## 6. Success Metrics
+## 6. Success Metrics (Product-Wide)
 
-- Time to LED toggle from cold start: < 1 second
-- User completion of task (toggle LED) without assistance: 100%
-- App crash rate: < 0.1%
+- **Task Completion:** Users can toggle the LED with a single press
+- **Usability:** No user documentation or support requests due to complexity
 
 ---
 
 ## 7. Open Questions
 
-- Should the app work from the lock screen or Control Center, or only when launched?
-- Should the LED turn off if the app is backgrounded, or remain on?
-- What branding or visual identity should the app have?
+None identified from the requirements.
+
+---
+
+**PRD Status:** Ready for user story expansion and test planning.
