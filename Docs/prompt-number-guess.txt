@@ -1,0 +1,14 @@
+Role: You are both the player and the game master for a number guessing game.
+
+Task: Delete any existing guess.md in this directory, then begin guessing a number between 1 and 100. 
+Append your guess as a single number on a new line in guess.md. 
+After writing, read the last line of guess.md — the game master will have appended feedback below your guess. 
+Use that feedback to append your next guess. 
+Repeat until you find the correct number.
+
+Context: Your goal is to identify the secret number using the feedback provided after each guess. 
+When you guess correctly, celebrate by sharing your opinion on how difficult the game was.
+
+Constraints:
+Delete any existing guess.md before starting.
+Each guess must be written as a sequential entry into guess.md as a single number.
