@@ -1,225 +1,106 @@
 # Req-gathering
 
-A structured toolkit for requirements discovery, PRD creation, and test planning. Provides reusable Claude Code skills that guide teams through product definition workflows.
+A structured toolkit for transforming product concepts into fully specified requirements, user stories, and test plans using reusable Claude Code skills.
 
-## Overview
-
-Req-gathering implements a **sequential skill-based workflow** for transforming product concepts into fully specified requirements, user stories, and test plans. Each skill is self-contained, repeatable, and designed to work with any product domain.
-
-### Workflow
+## Workflow
 
 ```
-Concept → Requirements Discovery → PRD Creation → User Story Detail → Test Planning
+Product Concept
+    ↓ (requirements-gathering)
+Requirements.md
+    ↓ (prd-creation)
+PRD.md
+    ↓ (user-story-expansion)
+User-Stories.md
+    ↓ (test-plan)
+Test-Plan.md
 ```
 
-1. **Requirements Discovery** — Structured user interview to uncover roles, tasks, gains, and pains
-2. **PRD Creation** — Pattern recognition across needs; design features that solve multiple problems
-3. **User Story Expansion** — Detailed acceptance criteria, data models, edge cases
-4. **Test Planning** — Comprehensive test strategy with categorized test cases and traceability
+**4 sequential skills:**
+1. **requirements-gathering** — Interview users to discover roles, tasks, gains, pains
+2. **prd-creation** — Design features from requirements patterns
+3. **user-story-expansion** — Detailed acceptance criteria & Gherkin scenarios
+4. **test-plan** — Pragmatic test strategy with categorized test cases
 
 ## Skills
 
-### 1. requirements-gathering
+| Skill | Purpose | Input | Output |
+|-------|---------|-------|--------|
+| **requirements-gathering** | Interview users systematically | Product concept | `/output/<name>/requirements.md` |
+| **prd-creation** | Design features from requirements | Requirements file | `/output/<name>/prd.md` |
+| **user-story-expansion** | Detail acceptance criteria | PRD file | `/output/<name>/user-stories.md` |
+| **test-plan** | Create test strategy | User stories | `/output/<name>/test-plan.md` |
 
-**Purpose:** Interactively discover user needs through structured conversation.
-
-**When to use:** When you have a product concept and want to understand who will use it and what problems they're trying to solve.
-
-**Inputs:**
-- Product name or concept description
-
-**Outputs:**
-- `/output/<product_name>/requirements.md` — Discovered user roles, tasks, gains, and pains
-
-**How it works:**
-- Identifies user roles (e.g., "Workout Newbie", "Gym Rat")
-- For each role, discovers tasks they want to accomplish
-- For each task, captures success criteria, gains, and pains
-- Organizes findings in a Value Prop Canvas format
+**All four skills include automatic quality evaluation** that generates `-eval.html` reports on output.
 
 ---
 
-### 2. prd-creation
+## Quick Start
 
-**Purpose:** Generate a production-ready PRD from discovered requirements.
+1. **Have a product idea?** Run requirements-gathering skill
+2. **Have requirements?** Run prd-creation skill  
+3. **Have a PRD?** Run user-story-expansion skill
+4. **Ready to test?** Run test-plan skill
 
-**When to use:** After running requirements-gathering, or if you already have a requirements document.
+Each skill auto-evaluates its output and saves results as `-eval.html` in the same directory.
 
-**Inputs:**
-- Path to requirements file (e.g., `/output/habit-tracker/requirements.md`)
-
-**Outputs:**
-- `/output/<product_name>/prd.md` — Complete PRD with features, goals, non-goals, metrics, and traceability
-
-**How it works:**
-- Reads discovered needs
-- Identifies patterns (gains/pains that appear across multiple roles)
-- Designs features using many-to-one pattern (one feature solves multiple problems)
-- Generates PRD sections: Overview, Goals, User Roles, Features, NFRs, Success Metrics, Open Questions
-- Each feature traces back to which user roles/tasks/gains/pains it solves
-
----
-
-### 3. user-story-expansion
-
-**Purpose:** Detail acceptance criteria and workflows for features.
-
-**When to use:** After PRD creation, when you need to specify exactly how features should behave.
-
-**Inputs:**
-- Path to PRD file (e.g., `/output/habit-tracker/prd.md`)
-
-**Outputs:**
-- `/output/<product_name>/user-stories.md` — User stories with acceptance criteria (Gherkin), data models, edge cases, and open questions
-
----
-
-### 4. test-plan
-
-**Purpose:** Create pragmatic, context-appropriate test strategy and test cases.
-
-**When to use:** When user stories and PRD are finalized, and you need a test strategy.
-
-**Inputs:**
-- Path to user stories or PRD (e.g., `/output/pomodoro/user-stories.md`)
-
-**Outputs:**
-- `/output/<product_name>/test-plan.md` — Pragmatic test plan with:
-  - **Selective categories:** Only include test types relevant to the feature (not all 5 for every feature)
-  - Unit tests (dev-owned, pre-commit, ≥80% coverage)
-  - Integration tests (QA-owned, post-merge, ≥60% critical workflows)
-  - E2E tests (100% of user journeys where applicable)
-  - Edge case tests (boundary conditions, error states)
-  - Performance tests (only if feature has explicit performance requirements)
-  - Concise traceability matrix (REQ-FEATURE-01 → test cases)
-
-**Philosophy:** Generates lean, context-appropriate plans instead of boilerplate. A simple button needs 1 unit test; a dashboard with 100k+ rows needs performance tests. No mandatory sections.
-
----
-
-## Usage
-
-### Quick Start
-
-1. **Have a product idea?** Start here:
-   ```
-   /requirements-gathering
-   ```
-   Answer prompts about user roles and what they want to accomplish. Output saved to `/output/<product_name>/requirements.md`.
-
-2. **Done with discovery?** Create your PRD:
-   ```
-   /prd-creation
-   ```
-   Point to your `/output/<product_name>/requirements.md` file. Output saved to `/output/<product_name>/prd.md`.
-
-3. **Ready to detail features?** Expand user stories:
-   ```
-   /user-story-expansion
-   ```
-   Point to your `/output/<product_name>/prd.md` file. Output saved to `/output/<product_name>/user-stories.md`.
-
-4. **Need a test strategy?** Generate a test plan:
-   ```
-   /test-plan
-   ```
-   Point to your `/output/<product_name>/user-stories.md` or `/output/<product_name>/prd.md`. Output saved to `/output/<product_name>/test-plan.md`.
-
-### Output Structure
-
-All skills generate markdown files in a consistent structure:
-
-```
-/output/
-├── <product_1>/
-│   ├── requirements.md      (from requirements-gathering)
-│   ├── prd.md              (from prd-creation)
-│   ├── user-stories.md     (from user-story-expansion)
-│   └── test-plan.md        (from test-plan)
-├── <product_2>/
-│   ├── requirements.md
-│   ├── prd.md
-│   └── ...
+**Manual evaluation:**
+```bash
+echo "/path/to/file.md" > EVAL.txt  # Trigger evaluation of any file
 ```
 
-Each product folder contains the complete product specification chain, making it easy to organize, version, and archive project deliverables.
-
-### End-to-End Examples
-
-**Habit Tracker (Fitness App)** — Complete workflow with all steps:
-- `output/habit-tracker/concept.md` — Initial product idea
-- `output/habit-tracker/requirements.md` — Discovered user needs (from requirements-gathering)
-- `output/habit-tracker/prd.md` — Generated PRD with 6 features (from prd-creation)
-- `output/habit-tracker/user-stories.md` — Detailed user stories with 12 stories & 36 acceptance criteria (from user-story-expansion)
-- `output/habit-tracker/test-plan.md` — Comprehensive test strategy with 38 test cases (from test-plan)
-
-**Pomodoro Timer (Focus App)** — Pragmatic test planning example:
-- `output/pomodoro/prd.md` — 7-feature PRD (Timer, Task, Break, Config, Dashboard, Integration, System)
-- `output/pomodoro/user-stories.md` — Detailed specification with 32 user stories, 140+ acceptance criteria
-- `output/pomodoro/test-plan.md` — **Pragmatic test plan:** 33 test cases (not 62), selective categories, concise format
-  - Demonstrates lean approach: performance tests only for dashboard load (<2s), no performance tests for simple features
-  - Shows how to scale test density: 1-5 tests per requirement based on complexity
-
-To see how the workflow flows (Habit Tracker):
-1. Start with `concept.md` (what we're building)
-2. Read `requirements.md` (what we learned from users)
-3. Study `prd.md` (how we turned discovery into features)
-4. Review `user-stories.md` (detailed acceptance criteria with Gherkin format)
-5. Examine `test-plan.md` (how we verify everything works)
-
-To see pragmatic test planning (Pomodoro):
-1. Check `test-plan.md` (35-row traceability matrix, 33 concise test cases)
-2. Note selective categories: TIMER has Unit+Integration+E2E; DASH has Integration+Performance only
-3. See how test cases fit on one screen (no verbose examples)
-4. Review honest gaps section (v2 features, platform-specific work deferred)
-
 ---
 
-## Automation & Quality Checks
+## Automatic Quality Checks
 
-### PRD Quality Evaluator
+All four skills include auto-running evaluators triggered on output:
 
-The toolkit includes automatic PRD quality evaluation:
-
-**Files:**
-- `.claude/settings.json` — Configures PostToolUse hooks
-- `.claude/skills/prd-creation/eval-prd.py` — PRD quality validator
+| Skill Output | Evaluator | Checks | Status |
+|--------------|-----------|--------|--------|
+| `requirements.md` | eval-requirements.py | 14 checks (structure, roles, gains/pains) | ✅ |
+| `prd.md` | eval-prd.py | 12 checks (structure, traceability, metrics) | ✅ |
+| `user-stories.md` | eval-user-stories.py | 19 checks (ID format, Gherkin, AC structure) | ✅ |
+| `test-plan.md` | eval-test-plan.py | 15 checks (coverage, density, traceability) | ✅ |
 
 **How it works:**
-1. When PRD-creation skill outputs a PRD to `/output/<product>/prd.md`
-2. Hook automatically triggers evaluation script
-3. Checks for:
-   - Required sections (Goals, Overview, Requirements, Constraints, Success Metrics, Edge Cases)
-   - Placeholder text (TBD, TODO, FIXME)
-   - Section completeness
-4. Displays inline results with quality score and improvement suggestions
-
-**No manual review needed** — Quality checks run automatically, giving immediate feedback on PRD completeness.
+- When a skill writes output to `/output/*/filename.md`, PostToolUse hook auto-triggers the evaluator
+- Evaluator generates `filename-eval.html` report with score and feedback
+- EVAL.txt is auto-deleted after evaluation completes
+- No manual review needed—all checks run automatically
 
 ---
 
-## Key Principles
+## Examples
 
-### 1. Traceability First
-Every feature traces back to discovered user needs. No feature exists in a vacuum; every requirement solves a specific pain or enables a gain.
+**Habit Tracker** — Full workflow (concept → requirements → PRD → user stories → tests)
+- 2 user roles, 5 tasks, comprehensive gains/pains
+- 6 features solving multiple user needs elegantly
+- 12 user stories with 36 detailed acceptance criteria
+- 38 test cases across 5 categories
 
-### 2. Many-to-One Pattern
-A single feature often solves multiple user problems elegantly. Rather than designing separate features for each pain, we identify where problems cluster and design features that address multiple needs simultaneously.
+**Pomodoro Timer** — Pragmatic approach to test planning
+- 7 features with 32 user stories
+- 33 test cases (selective categories—no unnecessary tests)
+- Demonstrates lean testing: performance tests only where needed
 
-Example from Habit Tracker:
-- **Pain 1 (Newbie):** "Logging takes too long and kills momentum"
-- **Pain 2 (Gym Rat):** "Manual export to spreadsheets for analysis"
-- **Solution 1 Feature:** Quick-log interface solves both (fast capture + granular data)
+**iPhone Flashlight** — Minimal feature, comprehensive testing
+- 1 core feature (LED toggle) with 8 acceptance criteria  
+- 27 test cases showing that simplicity requires rigor
+- Permission handling, device constraints, battery efficiency, accessibility
 
-### 3. Sequential Handoff
-Each skill's output becomes the next skill's input. Don't skip phases; each phase adds specificity:
-- Discovery → focus on *what users need*
-- PRD → focus on *what features solve*
-- User Stories → focus on *how features behave*
-- Test Plan → focus on *how to verify features work*
+---
 
-### 4. User-Centric, Not Feature-Centric
-Start by understanding problems (gains/pains), not by designing solutions. Users describe their world; we design the responses.
+## How to Use This Toolkit
+
+**Core principle:** Sequential handoff adds specificity at each phase
+- **Discovery** → What do users need?
+- **PRD** → What features solve these needs?
+- **User Stories** → How do features behave?
+- **Test Plan** → How do we verify everything works?
+
+**Don't skip steps.** Skipping discovery loses user voice. Skipping PRD creates feature sprawl. Skipping user stories loses acceptance criteria. Skipping test plan ships bugs.
+
+**Do adapt to context.** Use Habit Tracker as a detailed example. Use Pomodoro to see pragmatic, not exhaustive, test planning. Use iPhone Flashlight to challenge the assumption that "minimal = simple."
 
 ---
 
@@ -227,100 +108,32 @@ Start by understanding problems (gains/pains), not by designing solutions. Users
 
 ```
 .
-├── README.md                           (this file)
+├── README.md
 ├── .claude/
-│   ├── settings.json                   (project settings & hooks for PRD evaluation)
+│   ├── settings.json          (PostToolUse hooks)
 │   └── skills/
-│       ├── requirements-gathering/
-│       │   └── SKILL.md                (discovery workflow)
-│       ├── prd-creation/
-│       │   ├── SKILL.md                (PRD generation workflow)
-│       │   └── eval-prd.py             (PRD quality evaluator - auto-runs on PRD output)
-│       ├── user-story-expansion/
-│       │   └── SKILL.md                (acceptance criteria workflow)
-│       └── test-plan/
-│           └── SKILL.md                (pragmatic test strategy workflow)
+│       ├── requirements-gathering/SKILL.md
+│       ├── prd-creation/SKILL.md + eval-prd.py
+│       ├── user-story-expansion/SKILL.md
+│       └── test-plan/SKILL.md + eval-test-plan.py
 └── output/
-    ├── habit-tracker/
-    │   ├── concept.md                  (initial product idea)
-    │   ├── requirements.md             (discovered user needs)
-    │   ├── prd.md                      (6-feature PRD)
-    │   ├── user-stories.md             (12 user stories, 36 acceptance criteria)
-    │   └── test-plan.md                (38 test cases, 5 categories, 100% coverage)
-    └── pomodoro/
-        ├── prd.md                      (Pomodoro Timer PRD)
-        ├── user-stories.md             (32 user stories across 7 features)
-        ├── test-plan.md                (33 pragmatic test cases, 118 hours effort)
-        └── pomodoro-reqs-test-data.md  (test data fixtures & fast-test constants)
+    ├── habit-tracker/         (full workflow example)
+    ├── pomodoro/              (pragmatic test planning)
+    └── iphone-flashlight/     (minimal feature example)
 ```
 
 ---
 
-## For Your First Product
+## Getting Started
 
-When using this toolkit for a new product:
+1. **Have a product idea?** → Run `/requirements-gathering`
+2. **Have a requirements doc?** → Run `/prd-creation`
+3. **Have a PRD?** → Run `/user-story-expansion`
+4. **Ready to test?** → Run `/test-plan`
 
-1. **Start small** — You don't need a polished concept. "A task management app" is enough to begin discovery.
+Each skill saves output to `/output/<product_name>/` and auto-evaluates the results.
 
-2. **Validate in discovery** — The requirements-gathering skill helps you interview users systematically. Capture their language, not your solutions.
-
-3. **Identify patterns early** — As you build the PRD, look for gains/pains that repeat across roles. These are opportunities to design elegant, multi-purpose features.
-
-4. **Keep traceability links** — Reference user roles and tasks in feature descriptions. This makes it easy to push back on feature creep ("Does this solve a discovered pain?").
-
-5. **Defer implementation details** — PRDs should specify *what* users need, not *how* to code it. Tech decisions come later.
-
----
-
-## Tips for Success
-
-### For Product Managers
-- Use discovery to challenge assumptions. Users often describe problems differently than you expected.
-- Prioritize by traceability. Features that solve multiple user problems have higher ROI.
-- Keep PRDs user-focused. When a feature seems generic ("improve performance"), trace it back to a specific user need.
-
-### For Designers
-- User stories + acceptance criteria give you concrete workflows to design. Don't go broader.
-- Form guidance, dashboard views, and quick-log flows are all defined in the example PRD—use them as interaction starting points.
-- Edge cases and open questions in user stories highlight areas needing design decisions.
-
-### For Developers
-- Test plan provides traceability from code to user needs. Organize tests by layer (unit, integration, E2E).
-- User stories define acceptance criteria in Gherkin. These should map 1:1 to your test cases.
-- Non-functional requirements (performance, offline, reliability) are in the PRD—use them to drive architecture.
-
-### For QA/Test Engineers
-- Test plan categorizes tests by ownership (dev unit tests, QA integration/E2E, DevOps performance).
-- Every test traces back to a requirement (REQ-FEATURE-01 maps to specific test cases).
-- Edge cases and error handling tests are explicitly scoped in the test plan.
-
----
-
-## Common Questions
-
-**Q: Do I need to run all four skills?**
-A: No. You can use any skill standalone. Requirements discovery → PRD is the core workflow. User story expansion and test planning are optional but recommended.
-
-**Q: Can I use this for existing products?**
-A: Yes. Start with the PRD creation skill if you already have a requirements document. Or run discovery to understand what users actually need vs. what was built.
-
-**Q: What if my product doesn't fit the discovery questions?**
-A: The framework is flexible. The skill prompts are starting points. Adapt them to your domain (jobs, gains, pains work across B2B, B2C, internal tools, marketplaces, etc.).
-
-**Q: How detailed should PRDs be?**
-A: Use the Habit Tracker example as a guide. Include enough detail that a designer/dev can start work, but not so much that you've designed the implementation (that's their job).
-
----
-
-## Contributing
-
-This toolkit is designed to be extended with:
-- Additional example products (SaaS, B2B, marketplaces)
-- Domain-specific discovery questions (healthcare, fintech, etc.)
-- Custom feature design patterns
-- Integration with AI agents for automated discovery or PRD generation
-
----
+**Questions?** See Examples section above or review the three worked examples in `/output/`.
 
 ## License
 
@@ -333,12 +146,24 @@ This toolkit is open source. Use, modify, and share freely.
 ## Recent Improvements
 
 **May 21, 2026:**
+- **Automatic Evaluation Hooks:** Enhanced PostToolUse configuration with EVAL.txt manual trigger support
+  - PRD and test-plan evaluators auto-run on file write
+  - Manual trigger via `echo "path/to/file.md" > EVAL.txt` for on-demand evaluation
+  - Both evaluators auto-delete EVAL.txt after completion
+- **iPhone Flashlight Example:** Real-world minimalist iOS app example
+  - Single-feature (LED toggle) demonstrates comprehensive testing at any scale
+  - 27 test cases across unit, integration, E2E, edge case, and performance categories
+  - Shows permission handling, device constraints (iPad), battery efficiency, accessibility (WCAG AA)
 - **Pragmatic Test Planning:** Refactored test-plan skill to be context-aware, not prescriptive
   - Selective test categories (include only what applies)
   - Concise traceability matrices (5-10 rows, not exhaustive)
   - Flexible test density (1-5 per requirement, not fixed ratios)
   - Brief test case format (3-7 line Gherkin, fits on one screen)
-- **PRD Evaluation Automation:** Added auto-running quality checks on PRD output
+- **PRD Quality Evaluator:** Added auto-running quality checks on PRD output
+  - Validates against SKILL.md structure (not generic sections)
+  - Checks feature traceability ("Solves For" sections present)
+  - Verifies explicit non-goals and quantified success metrics
+  - PostToolUse hook triggers automatically on PRD write
 - **Pomodoro Example:** Comprehensive specification for focus/timer app (32 stories, pragmatic test plan)
 
 ---

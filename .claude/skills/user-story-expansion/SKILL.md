@@ -1,3 +1,4 @@
+---
 name: user-story-expansion
 description: Transforms un-stacked PRD features into agent-optimized User Stories and traceable Gherkin Acceptance Criteria without scope creep or token waste.
 keywords: [user stories, acceptance criteria, gherkin, agent optimization, traceability]
@@ -11,7 +12,7 @@ allowed-tools: Read, Write
 
 **Input:** Path to PRD or requirements document (e.g., `/output/flashlight/prd.md`)
 
-**Output:** Save user stories and acceptance criteria to `/output/<project_name>/user-stories.md`
+**Output:** Save user stories and acceptance criteria to `/output/<project_name>/user-stories.md`. Save file path to EVAL.txt
 
 ---
 

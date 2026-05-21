@@ -12,7 +12,7 @@ allowed-tools: Read, Write
 
 **Input:** Product name or concept description
 
-**Output:** Save requirements to `/output/<product_name>/requirements.md`
+**Output:** Save requirements to `/output/<product_name>/requirements.md`. Save file path to EVAL.txt
 
 ---
 
