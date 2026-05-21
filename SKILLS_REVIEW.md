@@ -1,7 +1,7 @@
 # Skills Status & Configuration
 
 **Last Updated:** May 21, 2026  
-**Status:** ✅ All skills operational with evaluation automation
+**Status:** ✅ All skills operational with evaluation automation + structural review completed
 
 ---
 
@@ -98,10 +98,63 @@ PostToolUse hooks configured for:
 
 ## Skills Reviewed
 
-1. ✅ requirements-gathering
-2. ✅ prd-creation
-3. ✅ user-story-expansion
-4. ✅ test-plan
+1. ✅ requirements-gathering (129 lines)
+2. ✅ prd-creation (165 lines)
+3. ✅ user-story-expansion (78 lines)
+4. ✅ test-plan (357 lines)
+
+---
+
+## Structural Analysis (May 21, 2026)
+
+### Section Coverage Comparison
+
+| Feature | req-gather | prd-create | user-stories | test-plan |
+|---------|-----------|-----------|--------------|-----------|
+| **Input & Output section** | ✅ Yes | ✅ Yes | ✅ Yes | ⚠️ Scattered |
+| **Core process walkthrough** | ✅ Discovery | ✅ PRD Gen | ❌ None | ✅ Test Structure |
+| **Example output** | ❌ None | ❌ None | ❌ None | ✅ Has examples |
+| **Execution guardrails** | ❌ None | ❌ None | ✅ Has (#🚫) | ❌ None |
+| **When to use section** | ❌ None | ❌ None | ❌ None | ✅ Has |
+| **System/Core directives** | ❌ None | ❌ None | ✅ Has (#🎯) | ❌ None |
+
+### Key Findings
+
+#### 1. ✅ EVAL.txt Integration (All Consistent)
+- All 4 skills have "Save file path to EVAL.txt" in output instruction
+- No gaps in evaluation automation setup
+
+#### 2. ⚠️ Structural Inconsistencies
+- **Different section organization:** Each skill has unique structure with no common template
+- **user-story-expansion is shortest** (78 lines vs 129-357 for others)
+- **test-plan layout:** Output instructions scattered vs unified "Input & Output" at top in other skills
+- **Emoji headers:** Only user-story-expansion uses 🤖🎯🚫 emoji headers (unique style)
+
+#### 3. ⚠️ Documentation Gaps
+- **Missing example outputs:** requirements-gathering, prd-creation, user-story-expansion have no "Example Output" section (only test-plan does)
+- **Missing "When to Use":** Only test-plan has guidance on when skill is appropriate (other 3 lack this)
+- **user-story-expansion under-documented:** 78 lines with no process walkthrough vs 129+ for similar skills
+
+#### 4. ✅ Metadata Consistency
+- `allowed-tools` properly configured for all
+- `argument-hint` present and descriptive
+- Output path format consistent: `/output/<project_name>/<deliverable>.md`
+
+### Recommendations (Not Implemented - For Future)
+
+**Priority 1 (Structure):**
+- Add unified "Input & Output" section to test-plan (consistent with other 3)
+- Add "Example Output" section to requirements-gathering, prd-creation, user-story-expansion
+
+**Priority 2 (Documentation):**
+- Add "When to Use This Skill" section to requirements-gathering, prd-creation, user-story-expansion
+- Expand user-story-expansion with detailed examples and process walkthrough
+
+**Priority 3 (Consistency):**
+- Consider standardizing emoji usage (remove or add to all for visual hierarchy)
+- Create shared structure template for future skills
+
+**Current Status:** ✅ All skills functional and EVAL.txt integrated; structural improvements noted for future iterations
 
 ---
 
@@ -201,4 +254,4 @@ All skills are:
 ---
 
 **Reviewed by:** Claude Code  
-**Date:** 2026-05-20
+**Date:** 2026-05-21
