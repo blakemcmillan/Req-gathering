@@ -12,7 +12,7 @@ allowed-tools: Read, Write
 
 **Input:** Path to requirements document (e.g., `/output/habit-tracker/requirements.md`)
 
-**Output:** Save PRD to `/output/<project_name>/prd.md`
+**Output:** Save PRD to `/output/<project_name>/prd.md`. Save file path to EVAL.txt
 
 ---
 
