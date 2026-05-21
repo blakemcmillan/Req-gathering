@@ -9,20 +9,34 @@
 
 | Skill | Purpose | Input | Output | Status |
 |-------|---------|-------|--------|--------|
-| **requirements-gathering** | Interactive user discovery | Product concept | `/output/<name>/requirements.md` | ✅ Ready |
+| **requirements-gathering** | Interactive user discovery | Product concept | `/output/<name>/requirements.md` | ✅ Ready + Auto-Evaluate |
 | **prd-creation** | PRD generation from needs | Requirements file | `/output/<name>/prd.md` | ✅ Ready + Auto-Evaluate |
-| **user-story-expansion** | Acceptance criteria & workflows | PRD file | `/output/<name>/user-stories.md` | ✅ Ready |
+| **user-story-expansion** | Acceptance criteria & workflows | PRD file | `/output/<name>/user-stories.md` | ✅ Ready + Auto-Evaluate |
 | **test-plan** | Test strategy & test cases | User stories | `/output/<name>/test-plan.md` | ✅ Ready + Auto-Evaluate |
 
 ---
 
 ## Evaluation Automation
 
+### Requirements Quality Evaluator (`eval-requirements.py`)
+- **Trigger:** Auto-runs on `/output/*/requirements.md` write
+- **Manual Trigger:** `echo "/path/to/requirements.md" > EVAL.txt`
+- **Checks:** Structure, use cases, features, stakeholders, success metrics, constraints, assumptions
+- **Output:** `/output/<name>/requirements-eval.html`
+- **Cleanup:** Auto-deletes EVAL.txt after completion
+
 ### PRD Quality Evaluator (`eval-prd.py`)
 - **Trigger:** Auto-runs on `/output/*/prd.md` write
 - **Manual Trigger:** `echo "/path/to/prd.md" > EVAL.txt`
 - **Checks:** Structure, traceability, placeholders, quantified metrics
 - **Output:** `/output/<name>/prd-eval.html`
+- **Cleanup:** Auto-deletes EVAL.txt after completion
+
+### User Story Quality Evaluator (`eval-user-stories.py`)
+- **Trigger:** Auto-runs on `/output/*/user-stories.md` write
+- **Manual Trigger:** `echo "/path/to/user-stories.md" > EVAL.txt`
+- **Checks:** ID format (US-[PROJ]-[FEATURE]-[NUM]), Gherkin compliance, acceptance criteria structure, Fast-Test Mode, boundary conditions, NFRs, no standalone NFRs
+- **Output:** `/output/<name>/user-stories-eval.html`
 - **Cleanup:** Auto-deletes EVAL.txt after completion
 
 ### Test Plan Quality Evaluator (`eval-test-plan.py`)
@@ -38,16 +52,16 @@
 
 ```
 requirements-gathering
-    ↓ outputs to /output/<name>/requirements.md
+    ↓ outputs to /output/<name>/requirements.md (auto-evaluated)
 prd-creation
     ↓ outputs to /output/<name>/prd.md (auto-evaluated)
 user-story-expansion
-    ↓ outputs to /output/<name>/user-stories.md
+    ↓ outputs to /output/<name>/user-stories.md (auto-evaluated)
 test-plan
     ↓ outputs to /output/<name>/test-plan.md (auto-evaluated)
 ```
 
-All skills are production-ready for sequential or standalone use.
+**All four core skills now have automatic quality evaluation built into the PostToolUse hook chain.**
 
 ---
 
